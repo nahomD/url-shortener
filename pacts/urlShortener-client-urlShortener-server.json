@@ -1,0 +1,53 @@
+{
+  "consumer": {
+    "name": "urlShortener-client"
+  },
+  "interactions": [
+    {
+      "description": "a request for a greeting",
+      "request": {
+        "headers": {
+          "Accept": "*/*"
+        },
+        "method": "GET",
+        "path": "/v1"
+      },
+      "response": {
+        "body": {
+          "greeting": "hello world"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.greeting": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "11.0.2"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "urlShortener-server"
+  }
+}
