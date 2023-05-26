@@ -12,6 +12,7 @@ const provider = new PactV3({
 
 describe('Get api/', () => {
   test('returns HTTP 200 with a greeting', () => {
+    const greeting = 'hello world';
     provider
       .uponReceiving('a request for a greeting')
       .withRequest({
@@ -22,13 +23,13 @@ describe('Get api/', () => {
       .willRespondWith({
         status: 200,
         contentType: 'application/json',
-        body: { greeting: string('hello world') },
+        body: { greeting: string(greeting) },
       });
 
     return provider.executeTest(async (mockServer) => {
       process.env.NEXT_PUBLIC_API_BASE_URL = mockServer.url;
       const greeting = await fetchGreeting('/v1');
-      expect(greeting).toBe('hello world');
+      expect(greeting).toBe(greeting);
     });
   });
 });
