@@ -10,7 +10,7 @@
           "Accept": "*/*"
         },
         "method": "GET",
-        "path": "/v1"
+        "path": "/api"
       },
       "response": {
         "body": {
