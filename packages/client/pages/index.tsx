@@ -1,7 +1,29 @@
+import { fetchGreeting } from '@/utilities/httpClient';
+import { useEffect, useState } from 'react';
+
 export default function Index() {
+  const [greeting, setGreeting] = useState('');
+  const [failure, setFailure] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const greeting = await fetchGreeting('/api');
+        setGreeting(greeting);
+      } catch (error) {
+        setFailure('Something went wrong');
+      }
+    })();
+  }, []);
+
   return (
-    <div className="flex justify-center items-center h-screen">
-      <h1 className="text-2xl">Hello World!</h1>
+    <div className="flex justify-center items-center h-screen text-2xl">
+      {greeting && <h1>{greeting}</h1>}
+      {failure && (
+        <div role="error" className="text-red-400">
+          {failure}
+        </div>
+      )}
     </div>
-  )
+  );
 }
