@@ -8,5 +8,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../../coverage/packages/client',
-  setupFilesAfterEnv: ['./setupTests.ts'],
+  setupFilesAfterEnv: ['./jest.setup.ts'],
 };
