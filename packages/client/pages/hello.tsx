@@ -1,7 +1,7 @@
 import { fetchGreeting } from '@/utilities/httpClient';
 import { useEffect, useState } from 'react';
 
-export default function Index() {
+export default function Home() {
   const [greeting, setGreeting] = useState('');
   const [failure, setFailure] = useState('');
 

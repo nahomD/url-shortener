@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import Index from 'pages';
+import Home from 'pages/hello';
 
 const mockFetchGreeting = jest.fn();
 jest.mock('@/utilities/httpClient', () => {
@@ -9,7 +9,7 @@ jest.mock('@/utilities/httpClient', () => {
 });
 
 function renderIndex() {
-  render(<Index />);
+  render(<Home />);
 }
 
 async function findElementByRole(role: string) {
