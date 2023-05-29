@@ -1,6 +1,10 @@
-import '@/styles/global.css'
+import '@/styles/global.css';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
+
+if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
+  require('../mocks');
+}
 
 function CustomApp({ Component, pageProps }: AppProps) {
   return (
