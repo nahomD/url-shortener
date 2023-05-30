@@ -33,6 +33,63 @@
         },
         "status": 200
       }
+    },
+    {
+      "description": "a request to shorten a url",
+      "request": {
+        "body": {
+          "url": "https://google.com"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.url": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {}
+        },
+        "method": "POST",
+        "path": "/api/urls"
+      },
+      "response": {
+        "body": {
+          "longUrl": "https://google.com",
+          "shortUrl": "https://sh.t/go"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.longUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.shortUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      }
     }
   ],
   "metadata": {

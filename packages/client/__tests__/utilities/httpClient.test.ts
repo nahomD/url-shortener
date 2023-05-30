@@ -1,6 +1,6 @@
 import path from 'path';
 import { PactV3, MatchersV3 } from '@pact-foundation/pact';
-import { fetch } from '@/utilities/httpClient';
+import { fetch, shortenUrl } from '@/utilities/httpClient';
 
 const { string } = MatchersV3;
 
@@ -30,5 +30,39 @@ test('Get api/ returns HTTP 200 with a greeting', () => {
     process.env.NEXT_PUBLIC_API_BASE_URL = mockServer.url;
     const greeting = await fetch(path);
     expect(greeting).toBe(greeting);
+  });
+});
+
+test('POST /api/urls returns 201 with a shortened url', () => {
+  const path = '/api/urls';
+  const longUrl = 'https://google.com';
+  const shortUrl = 'https://sh.t/go';
+
+  provider
+    .uponReceiving('a request to shorten a url')
+    .withRequest({
+      method: 'POST',
+      path,
+      headers: { Accept: 'application/json' },
+      body: { url: string(longUrl) },
+    })
+    .willRespondWith({
+      status: 201,
+      contentType: 'application/json',
+      body: {
+        longUrl: string(longUrl),
+        shortUrl: string(shortUrl),
+      },
+    });
+
+  return provider.executeTest(async (mockServer) => {
+    process.env.NEXT_PUBLIC_API_BASE_URL = mockServer.url;
+
+    const result = await shortenUrl(path, longUrl);
+
+    expect(result).toStrictEqual({
+      longUrl,
+      shortUrl,
+    });
   });
 });
