@@ -1,4 +1,4 @@
-import { fetchGreeting } from '@/utilities/httpClient';
+import { fetch } from '@/utilities/httpClient';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
@@ -8,7 +8,7 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       try {
-        const greeting = await fetchGreeting('/api');
+        const greeting = await fetch('/api');
         setGreeting(greeting);
       } catch (error) {
         setFailure('Something went wrong');

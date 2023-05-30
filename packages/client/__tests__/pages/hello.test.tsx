@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import Home from 'pages/hello';
 
-const mockFetchGreeting = jest.fn();
+const mockFetch = jest.fn();
 jest.mock('@/utilities/httpClient', () => {
   return {
-    fetchGreeting: (path: string) => mockFetchGreeting(path),
+    fetch: (path: string) => mockFetch(path),
   };
 });
 
@@ -23,18 +23,18 @@ function assertElementHasText(role: string, text: string) {
 describe('Index', () => {
   test('displays greeting', async () => {
     const greeting = 'Greetings World';
-    mockFetchGreeting.mockReturnValue(Promise.resolve(greeting));
+    mockFetch.mockReturnValue(Promise.resolve(greeting));
     renderIndex();
 
     const role = 'heading';
     await findElementByRole(role);
 
     assertElementHasText(role, greeting);
-    expect(mockFetchGreeting).toBeCalledWith('/api');
+    expect(mockFetch).toBeCalledWith('/api');
   });
 
   test('displays error if fetch fails', async () => {
-    mockFetchGreeting.mockImplementation(() => {
+    mockFetch.mockImplementation(() => {
       throw new Error();
     });
     renderIndex();

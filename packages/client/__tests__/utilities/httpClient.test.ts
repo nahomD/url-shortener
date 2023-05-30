@@ -1,6 +1,6 @@
 import path from 'path';
 import { PactV3, MatchersV3 } from '@pact-foundation/pact';
-import { fetchGreeting } from '@/utilities/httpClient';
+import { fetch } from '@/utilities/httpClient';
 
 const { string } = MatchersV3;
 
@@ -29,7 +29,7 @@ describe('Get api/', () => {
 
     return provider.executeTest(async (mockServer) => {
       process.env.NEXT_PUBLIC_API_BASE_URL = mockServer.url;
-      const greeting = await fetchGreeting(path);
+      const greeting = await fetch(path);
       expect(greeting).toBe(greeting);
     });
   });
