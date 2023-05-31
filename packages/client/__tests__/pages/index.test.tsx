@@ -93,6 +93,12 @@ describe('Index', () => {
     assertShortenUrlRequestWasNotSent();
   });
 
+  test('URL input starts focused', () => {
+    renderSUT();
+
+    expect(getUrlInput()).toHaveFocus();
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });

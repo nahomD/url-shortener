@@ -28,6 +28,7 @@ export default function Index() {
             placeholder="Enter link"
             onChange={(e) => setLink(e.target.value)}
             className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none"
+            autoFocus
           />
           <button
             onClick={async () => {
