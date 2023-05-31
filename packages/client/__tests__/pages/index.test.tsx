@@ -44,7 +44,7 @@ describe('Index', () => {
   test('heading is displayed', () => {
     renderSUT();
 
-    expect(getElementByRole('heading')).toHaveTextContent('Url Shortener');
+    expect(getElementByRole('heading')).toHaveTextContent('Create Short Links');
   });
 
   test('url input is empty by default', () => {

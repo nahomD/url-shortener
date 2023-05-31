@@ -7,7 +7,7 @@ export default function Index() {
 
   return (
     <>
-      <h1>Url Shortener</h1>
+      <h1>Create Short Links</h1>
       <input
         type="text"
         name="url"
