@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import Home from 'pages/hello';
+import Hello from 'pages/hello';
 
 const mockFetch = jest.fn();
 jest.mock('@/utilities/httpClient', () => {
@@ -8,8 +8,8 @@ jest.mock('@/utilities/httpClient', () => {
   };
 });
 
-function renderIndex() {
-  render(<Home />);
+function renderSUT() {
+  render(<Hello />);
 }
 
 async function findElementByRole(role: string) {
@@ -20,11 +20,11 @@ function assertElementHasText(role: string, text: string) {
   expect(screen.getByRole(role)).toHaveTextContent(text);
 }
 
-describe('Index', () => {
+describe('Hello', () => {
   test('displays greeting', async () => {
     const greeting = 'Greetings World';
     mockFetch.mockReturnValue(Promise.resolve(greeting));
-    renderIndex();
+    renderSUT();
 
     const role = 'heading';
     await findElementByRole(role);
@@ -37,7 +37,7 @@ describe('Index', () => {
     mockFetch.mockImplementation(() => {
       throw new Error();
     });
-    renderIndex();
+    renderSUT();
 
     const role = 'error';
     await findElementByRole(role);
