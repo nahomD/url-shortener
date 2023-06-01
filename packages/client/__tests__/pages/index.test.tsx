@@ -14,12 +14,12 @@ function renderSUT() {
   render(<Index />);
 }
 
-function getUrlInput(): HTMLElement {
-  return getElementByRole('textbox');
+function queryUrlInput(): HTMLElement | null {
+  return queryElementByRole('textbox');
 }
 
-function getElementByRole(role: string) {
-  return screen.getByRole(role);
+function queryElementByRole(role: string) {
+  return screen.queryByRole(role);
 }
 
 async function clickShortenButton() {
@@ -27,7 +27,13 @@ async function clickShortenButton() {
 }
 
 async function typeUrlIntoInput(validUrl: string) {
-  await userEvent.type(getUrlInput(), validUrl);
+  await userEvent.type(screen.getByRole('textbox'), validUrl);
+}
+
+function assertHeadingIsVisibleWithText(text: string) {
+  const heading = queryElementByRole('heading');
+  expect(heading).toBeVisible();
+  expect(heading).toHaveTextContent(text);
 }
 
 function assertShortenUrlRequestWasNotSent() {
@@ -44,25 +50,25 @@ describe('Index', () => {
   test('heading is displayed', () => {
     renderSUT();
 
-    expect(getElementByRole('heading')).toHaveTextContent('Create Short Links');
+    assertHeadingIsVisibleWithText('Create Short Links');
   });
 
   test('url input is empty by default', () => {
     renderSUT();
 
-    expect(getUrlInput()).not.toHaveValue();
+    expect(queryUrlInput()).not.toHaveValue();
   });
 
   test('url input has proper placeholder text', () => {
     renderSUT();
 
-    expect(getUrlInput()).toHaveAttribute('placeholder', 'Enter link');
+    expect(queryUrlInput()).toHaveAttribute('placeholder', 'Enter link');
   });
 
   test('shorten button has proper text', () => {
     renderSUT();
 
-    expect(getElementByRole('button')).toHaveTextContent(shortenButtonText);
+    expect(queryElementByRole('button')).toHaveTextContent(shortenButtonText);
   });
 
   test('valid url triggers a request', async () => {
@@ -96,7 +102,7 @@ describe('Index', () => {
   test('URL input starts focused', () => {
     renderSUT();
 
-    expect(getUrlInput()).toHaveFocus();
+    expect(queryUrlInput()).toHaveFocus();
   });
 
   afterEach(() => {
