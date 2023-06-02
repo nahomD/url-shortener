@@ -10,10 +10,7 @@ export async function fetch(path: string): Promise<string> {
   return response.data.greeting;
 }
 
-export async function shortenUrl(
-  path: string,
-  longUrl: string
-): Promise<ShortenedUrl> {
+export async function shortenUrl(longUrl: string): Promise<ShortenedUrl> {
   const reqBody = {
     url: longUrl,
   };
@@ -22,7 +19,7 @@ export async function shortenUrl(
     baseURL: getBaseUrl(),
   };
 
-  const response = await axios.post(path, reqBody, reqConf);
+  const response = await axios.post('/api/urls', reqBody, reqConf);
 
   return response.data;
 }

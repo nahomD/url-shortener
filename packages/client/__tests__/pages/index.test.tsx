@@ -5,8 +5,7 @@ import Index from 'pages';
 const mockShortenUrl = jest.fn();
 jest.mock('@/utilities/httpClient', () => {
   return {
-    shortenUrl: (path: string, longUrl: string) =>
-      mockShortenUrl(path, longUrl),
+    shortenUrl: (longUrl: string) => mockShortenUrl(longUrl),
   };
 });
 
@@ -114,7 +113,7 @@ describe('Index', () => {
     await typeValidUrlAndClickShorten();
 
     assertShortenUrlRequestTimes(1);
-    expect(mockShortenUrl).toBeCalledWith('/api/urls', validUrl);
+    expect(mockShortenUrl).toBeCalledWith(validUrl);
   });
 
   test('empty url does not trigger a request', async () => {

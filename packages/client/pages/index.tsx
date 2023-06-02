@@ -35,7 +35,7 @@ export default function Index() {
           <button
             onClick={async () => {
               if (isUrlHttp(link)) {
-                setShortenedUrl(await shortenUrl('/api/urls', link));
+                setShortenedUrl(await shortenUrl(link));
                 setLink('');
               }
             }}

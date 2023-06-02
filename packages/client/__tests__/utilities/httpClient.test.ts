@@ -58,7 +58,7 @@ test('POST /api/urls returns 201 with a shortened url', () => {
   return provider.executeTest(async (mockServer) => {
     process.env.NEXT_PUBLIC_API_BASE_URL = mockServer.url;
 
-    const result = await shortenUrl(path, longUrl);
+    const result = await shortenUrl(longUrl);
 
     expect(result).toStrictEqual({
       longUrl,
