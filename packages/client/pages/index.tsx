@@ -1,9 +1,10 @@
-import { shortenUrl } from '@/utilities/httpClient';
+import { ShortenedUrl, shortenUrl } from '@/utilities/httpClient';
 import { useState } from 'react';
 import isUrlHttp from 'is-url-http';
 
 export default function Index() {
   const [link, setLink] = useState('');
+  const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl>();
 
   return (
     <div className="flex flex-col items-center h-screen gap-y-14 justify-center">
@@ -28,17 +29,36 @@ export default function Index() {
             placeholder="Enter link"
             onChange={(e) => setLink(e.target.value)}
             className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none"
+            value={link}
             autoFocus
           />
           <button
             onClick={async () => {
-              if (isUrlHttp(link)) await shortenUrl('/api/urls', link);
+              if (isUrlHttp(link)) {
+                setShortenedUrl(await shortenUrl('/api/urls', link));
+                setLink('');
+              }
             }}
             className="px-6 rounded-lg bg-accent text-white py-2 shadow-md shadow-gray-500"
           >
             Shorten
           </button>
         </div>
+        {shortenedUrl && (
+          <div role="list">
+            <div role="listitem">
+              {shortenedUrl.longUrl}
+              {shortenedUrl.shortUrl}
+              <button
+                onClick={() =>
+                  navigator.clipboard.writeText(shortenedUrl.shortUrl)
+                }
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

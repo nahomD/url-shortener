@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../testUtils';
 import userEvent from '@testing-library/user-event';
 import Index from 'pages';
 
@@ -10,16 +10,33 @@ jest.mock('@/utilities/httpClient', () => {
   };
 });
 
+function setRequestResponse(resolved: object) {
+  mockShortenUrl.mockResolvedValue(resolved);
+}
+
 function renderSUT() {
   render(<Index />);
 }
 
-function queryUrlInput(): HTMLElement | null {
+function getUrlInput(): HTMLElement | null {
   return queryElementByRole('textbox');
+}
+
+function getList(): HTMLElement | null {
+  return queryElementByRole('list');
 }
 
 function queryElementByRole(role: string) {
   return screen.queryByRole(role);
+}
+
+async function typeValidUrlAndClickShorten() {
+  await typeUrlAndClickShorten(validUrl);
+}
+
+async function typeUrlAndClickShorten(url: string) {
+  await typeUrlIntoInput(url);
+  await clickShortenButton();
 }
 
 async function clickShortenButton() {
@@ -30,7 +47,7 @@ async function typeUrlIntoInput(validUrl: string) {
   await userEvent.type(screen.getByRole('textbox'), validUrl);
 }
 
-function assertHeadingIsVisibleWithText(text: string) {
+function assertHeadingWithText(text: string) {
   const heading = queryElementByRole('heading');
   expect(heading).toBeVisible();
   expect(heading).toHaveTextContent(text);
@@ -44,25 +61,45 @@ function assertShortenUrlRequestTimes(times: number) {
   expect(mockShortenUrl).toBeCalledTimes(times);
 }
 
+function assertAListItemIsInsideAList() {
+  const listItems = screen.queryAllByRole('listitem');
+  expect(listItems.length).toBe(1);
+  const fLItem = listItems[0];
+  expect(fLItem).toBeVisible();
+  expect(getList()).toContainElement(fLItem);
+}
+
+function assertListItemContainsText(text: string) {
+  expect(queryElementByRole('listitem')).toHaveTextContent(text);
+}
+
+function assertCopyButtonIsInsideAListItem() {
+  const copyButton = screen.queryByText(/^copy/i);
+  expect(queryElementByRole('listitem')).toContainElement(copyButton);
+  expect(copyButton).toBeVisible();
+}
+
 const shortenButtonText = /^shorten/i;
+const validUrl = 'https://google.com';
+const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
 
 describe('Index', () => {
   test('heading is displayed', () => {
     renderSUT();
 
-    assertHeadingIsVisibleWithText('Create Short Links');
+    assertHeadingWithText('Create Short Links');
   });
 
   test('url input is empty by default', () => {
     renderSUT();
 
-    expect(queryUrlInput()).not.toHaveValue();
+    expect(getUrlInput()).not.toHaveValue();
   });
 
   test('url input has proper placeholder text', () => {
     renderSUT();
 
-    expect(queryUrlInput()).toHaveAttribute('placeholder', 'Enter link');
+    expect(getUrlInput()).toHaveAttribute('placeholder', 'Enter link');
   });
 
   test('shorten button has proper text', () => {
@@ -72,11 +109,9 @@ describe('Index', () => {
   });
 
   test('valid url triggers a request', async () => {
-    const validUrl = 'https://google.com';
     renderSUT();
 
-    await typeUrlIntoInput(validUrl);
-    await clickShortenButton();
+    await typeValidUrlAndClickShorten();
 
     assertShortenUrlRequestTimes(1);
     expect(mockShortenUrl).toBeCalledWith('/api/urls', validUrl);
@@ -93,8 +128,7 @@ describe('Index', () => {
   test('invalid url does not trigger a request', async () => {
     renderSUT();
 
-    await typeUrlIntoInput('invalid url');
-    await clickShortenButton();
+    await typeUrlAndClickShorten('invalid url');
 
     assertShortenUrlRequestWasNotSent();
   });
@@ -102,7 +136,79 @@ describe('Index', () => {
   test('URL input starts focused', () => {
     renderSUT();
 
-    expect(queryUrlInput()).toHaveFocus();
+    expect(getUrlInput()).toHaveFocus();
+  });
+
+  test('displays a list after a successful request', async () => {
+    setRequestResponse({});
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    expect(getList()).toBeVisible();
+  });
+
+  test('no list exists before a successful request', () => {
+    renderSUT();
+
+    expect(getList()).not.toBeInTheDocument();
+  });
+
+  test('url input is cleared after a successful request', async () => {
+    setRequestResponse(response);
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    expect(getUrlInput()).toHaveValue('');
+  });
+
+  test('displays a single listitem inside a list after a successful request', async () => {
+    setRequestResponse({});
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    assertAListItemIsInsideAList();
+  });
+
+  test('displays original url after a successful request', async () => {
+    setRequestResponse(response);
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    assertListItemContainsText(validUrl);
+  });
+
+  test('displays shorted url after a successful request', async () => {
+    setRequestResponse(response);
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    assertListItemContainsText(response.shortUrl);
+  });
+
+  test('displays a copy button in a listitem after a successful request', async () => {
+    setRequestResponse(response);
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    assertCopyButtonIsInsideAListItem();
+  });
+
+  test('clicking the copy button copies short url', async () => {
+    setRequestResponse(response);
+    renderSUT();
+    await typeValidUrlAndClickShorten();
+    userEvent.setup();
+
+    await userEvent.click(screen.getByText(/^copy/i));
+
+    const clipText = await navigator.clipboard.readText();
+    expect(clipText).toBe(response.shortUrl);
   });
 
   afterEach(() => {
