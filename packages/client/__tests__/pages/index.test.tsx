@@ -68,8 +68,11 @@ function assertAListItemIsInsideAList() {
   expect(getList()).toContainElement(fLItem);
 }
 
-function assertListItemContainsText(text: string) {
-  expect(queryElementByRole('listitem')).toHaveTextContent(text);
+function assertListItemContainsUrlWithoutProtocol(url: string) {
+  const listItem = queryElementByRole('listitem');
+  const urlWithNoProtocol = url.slice(8);
+  expect(listItem).toHaveTextContent(urlWithNoProtocol);
+  expect(listItem).not.toHaveTextContent(url);
 }
 
 function assertCopyButtonIsInsideAListItem() {
@@ -79,7 +82,7 @@ function assertCopyButtonIsInsideAListItem() {
 }
 
 const shortenButtonText = /^shorten/i;
-const validUrl = 'https://google.com';
+const validUrl = 'https://google.com/test/path/1';
 const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
 
 describe('Index', () => {
@@ -139,7 +142,7 @@ describe('Index', () => {
   });
 
   test('displays a list after a successful request', async () => {
-    setRequestResponse({});
+    setRequestResponse(response);
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -163,7 +166,7 @@ describe('Index', () => {
   });
 
   test('displays a single listitem inside a list after a successful request', async () => {
-    setRequestResponse({});
+    setRequestResponse(response);
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -171,22 +174,22 @@ describe('Index', () => {
     assertAListItemIsInsideAList();
   });
 
-  test('displays original url after a successful request', async () => {
+  test('displays long url after a successful request', async () => {
     setRequestResponse(response);
     renderSUT();
 
     await typeValidUrlAndClickShorten();
 
-    assertListItemContainsText(validUrl);
+    assertListItemContainsUrlWithoutProtocol(response.longUrl);
   });
 
-  test('displays shorted url after a successful request', async () => {
+  test('displays shortened url after a successful request', async () => {
     setRequestResponse(response);
     renderSUT();
 
     await typeValidUrlAndClickShorten();
 
-    assertListItemContainsText(response.shortUrl);
+    assertListItemContainsUrlWithoutProtocol(response.shortUrl);
   });
 
   test('displays a copy button in a listitem after a successful request', async () => {

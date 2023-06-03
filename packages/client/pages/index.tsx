@@ -50,8 +50,10 @@ export default function Index() {
               role="listitem"
               className="flex flex-row justify-between items-center gap-x-2 text-lg"
             >
-              <p className="grow">{shortenedUrl.longUrl}</p>
-              <p className="text-accent">{shortenedUrl.shortUrl}</p>
+              <p className="grow">{removeProtocol(shortenedUrl.longUrl)}</p>
+              <p className="text-accent">
+                {removeProtocol(shortenedUrl.shortUrl)}
+              </p>
               <button
                 onClick={() =>
                   navigator.clipboard.writeText(shortenedUrl.shortUrl)
@@ -66,4 +68,9 @@ export default function Index() {
       </div>
     </div>
   );
+
+  function removeProtocol(url: string): string {
+    const u = new URL(url);
+    return u.hostname + u.pathname;
+  }
 }
