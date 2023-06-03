@@ -29,6 +29,10 @@ function queryElementByRole(role: string) {
   return screen.queryByRole(role);
 }
 
+function queryElementByText(text: string | RegExp): HTMLElement | null {
+  return screen.queryByText(text);
+}
+
 async function typeValidUrlAndClickShorten() {
   await typeUrlAndClickShorten(validUrl);
 }
@@ -76,13 +80,18 @@ function assertListItemContainsUrlWithoutProtocol(url: string) {
 }
 
 function assertCopyButtonIsInsideAListItem() {
-  const copyButton = screen.queryByText(/^copy/i);
+  const copyButton = queryElementByText(/^copy/i);
   expect(queryElementByRole('listitem')).toContainElement(copyButton);
   expect(copyButton).toBeVisible();
 }
 
+function assertInvalidLinkTextIsNotDisplayed() {
+  expect(queryElementByText('Invalid Link')).not.toBeInTheDocument();
+}
+
 const shortenButtonText = /^shorten/i;
 const validUrl = 'https://google.com/test/path/1';
+const invalidUrl = 'invalid url';
 const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
 
 describe('Index', () => {
@@ -127,10 +136,33 @@ describe('Index', () => {
     assertShortenUrlRequestWasNotSent();
   });
 
+  test('"Invalid Link" text appears if url is invalid', async () => {
+    renderSUT();
+
+    await typeUrlAndClickShorten(invalidUrl);
+
+    expect(queryElementByText('Invalid Link')).toBeVisible();
+  });
+
+  test('"Invalid Link" text is not found at the beginning', () => {
+    renderSUT();
+
+    assertInvalidLinkTextIsNotDisplayed();
+  });
+
+  test('"Invalid Link" text is not found after a successful request', async () => {
+    setRequestResponse(response);
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    assertInvalidLinkTextIsNotDisplayed();
+  });
+
   test('invalid url does not trigger a request', async () => {
     renderSUT();
 
-    await typeUrlAndClickShorten('invalid url');
+    await typeUrlAndClickShorten(invalidUrl);
 
     assertShortenUrlRequestWasNotSent();
   });

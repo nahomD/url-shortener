@@ -5,6 +5,7 @@ import isUrlHttp from 'is-url-http';
 export default function Index() {
   const [link, setLink] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl>();
+  const [isInvalidUrl, setIsInvalidUrl] = useState(false);
 
   return (
     <div className="flex flex-col items-center h-screen gap-y-14 justify-center">
@@ -37,13 +38,14 @@ export default function Index() {
               if (isUrlHttp(link)) {
                 setShortenedUrl(await shortenUrl(link));
                 setLink('');
-              }
+              } else setIsInvalidUrl(true);
             }}
             className="px-6 rounded-lg bg-accent text-white py-2 shadow-md shadow-gray-500 text-lg"
           >
             Shorten
           </button>
         </div>
+        {isInvalidUrl && <p>Invalid Link</p>}
         {shortenedUrl && (
           <div role="list" className="pt-4">
             <div
