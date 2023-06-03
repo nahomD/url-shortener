@@ -39,20 +39,24 @@ export default function Index() {
                 setLink('');
               }
             }}
-            className="px-6 rounded-lg bg-accent text-white py-2 shadow-md shadow-gray-500"
+            className="px-6 rounded-lg bg-accent text-white py-2 shadow-md shadow-gray-500 text-lg"
           >
             Shorten
           </button>
         </div>
         {shortenedUrl && (
-          <div role="list">
-            <div role="listitem">
-              {shortenedUrl.longUrl}
-              {shortenedUrl.shortUrl}
+          <div role="list" className="pt-4">
+            <div
+              role="listitem"
+              className="flex flex-row justify-between items-center gap-x-2 text-lg"
+            >
+              <p className="grow">{shortenedUrl.longUrl}</p>
+              <p className="text-accent">{shortenedUrl.shortUrl}</p>
               <button
                 onClick={() =>
                   navigator.clipboard.writeText(shortenedUrl.shortUrl)
                 }
+                className="text-accent px-4 py-2 hover:bg-slate-100 rounded-md hover:transition-all"
               >
                 Copy
               </button>
