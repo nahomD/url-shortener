@@ -8,10 +8,11 @@ export const handlers = [
       })
     );
   }),
-  rest.post('/api/urls', (_req, res, ctx) => {
+  rest.post('/api/urls', async (req, res, ctx) => {
+    const body = await req.json();
     return res(
       ctx.json({
-        longUrl: 'https://google.com',
+        longUrl: body.url,
         shortUrl: 'https://sh.rt/go',
       })
     );
