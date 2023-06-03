@@ -8,4 +8,12 @@ export const handlers = [
       })
     );
   }),
+  rest.post('/api/urls', (_req, res, ctx) => {
+    return res(
+      ctx.json({
+        longUrl: 'https://google.com',
+        shortUrl: 'https://sh.rt/go',
+      })
+    );
+  }),
 ];
