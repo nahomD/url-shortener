@@ -5,7 +5,7 @@ import isUrlHttp from 'is-url-http';
 export default function Index() {
   const [link, setLink] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl>();
-  const [isInvalidUrl, setIsInvalidUrl] = useState(false);
+  const [error, setError] = useState('');
 
   return (
     <div className="flex flex-col items-center h-screen gap-y-14 justify-center">
@@ -15,7 +15,7 @@ export default function Index() {
       <div className="rounded shadow-xl py-10 px-7">
         <div
           className={`flex gap-2 bg-slate-100 p-5 rounded-lg border-2 ${
-            isInvalidUrl ? 'border-red-400' : 'border-transparent'
+            error ? 'border-red-400' : 'border-transparent'
           }`}
         >
           <svg
@@ -40,19 +40,18 @@ export default function Index() {
           <button
             onClick={async () => {
               if (isUrlHttp(link)) {
-                setIsInvalidUrl(false);
                 setShortenedUrl(await shortenUrl(link));
                 setLink('');
-              } else setIsInvalidUrl(true);
+                setError('');
+              } else if (link === '') setError('URL is required');
+              else setError('Invalid Link');
             }}
             className="px-6 rounded-lg bg-accent text-white py-2 shadow-md shadow-gray-500 text-lg"
           >
             Shorten
           </button>
         </div>
-        {isInvalidUrl && (
-          <p className="text-red-600 text-sm pt-2">Invalid Link</p>
-        )}
+        {error && <p className="text-red-600 text-sm pt-2">{error}</p>}
         {shortenedUrl && (
           <div role="list" className="pt-4">
             <div

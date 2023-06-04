@@ -1,4 +1,4 @@
-import { render, screen } from '../testUtils';
+import { render, screen, waitFor } from '../testUtils';
 import userEvent from '@testing-library/user-event';
 import Index from 'pages';
 
@@ -152,6 +152,16 @@ describe('Index', () => {
     await clickShortenButton();
 
     assertShortenUrlRequestWasNotSent();
+  });
+
+  test('"URL is required" text appears if the requested url is empty', async () => {
+    renderSUT();
+
+    await clickShortenButton();
+
+    await waitFor(() => {
+      expect(queryElementByText('URL is required')).toBeVisible();
+    });
   });
 
   test('"Invalid Link" text appears if url is invalid', async () => {
