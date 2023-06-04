@@ -33,7 +33,7 @@ export default function Index() {
             id="url"
             placeholder="Enter link"
             onChange={(e) => setLink(e.target.value)}
-            className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none"
+            className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none text-accent"
             value={link}
             autoFocus
           />
