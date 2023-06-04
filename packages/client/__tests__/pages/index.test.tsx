@@ -58,6 +58,11 @@ function getUrlInput(): HTMLElement {
   return screen.getByRole('textbox');
 }
 
+async function clickCopyButton() {
+  userEvent.setup();
+  await userEvent.click(screen.getByText(/^copy/i));
+}
+
 function assertHeadingWithText(text: string) {
   const heading = queryElementByRole('heading');
   expect(heading).toBeVisible();
@@ -95,6 +100,11 @@ function assertCopyButtonIsInsideAListItem() {
 
 function assertInvalidLinkTextIsNotDisplayed() {
   expect(queryElementByText('Invalid Link')).not.toBeInTheDocument();
+}
+
+async function assertClipBoardContainsShortUrl() {
+  const clipText = await navigator.clipboard.readText();
+  expect(clipText).toBe(response.shortUrl);
 }
 
 const shortenButtonText = /^shorten/i;
@@ -247,12 +257,10 @@ describe('Index', () => {
     setRequestResponse(response);
     renderSUT();
     await typeValidUrlAndClickShorten();
-    userEvent.setup();
 
-    await userEvent.click(screen.getByText(/^copy/i));
+    await clickCopyButton();
 
-    const clipText = await navigator.clipboard.readText();
-    expect(clipText).toBe(response.shortUrl);
+    await assertClipBoardContainsShortUrl();
   });
 
   afterEach(() => {
