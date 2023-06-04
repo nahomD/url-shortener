@@ -17,10 +17,6 @@ function renderSUT() {
   render(<Index />);
 }
 
-function getUrlInput(): HTMLElement | null {
-  return queryElementByRole('textbox');
-}
-
 function getList(): HTMLElement | null {
   return queryElementByRole('list');
 }
@@ -37,6 +33,10 @@ async function typeValidUrlAndClickShorten() {
   await typeUrlAndClickShorten(validUrl);
 }
 
+async function typeInvalidUrlAndClickShorten() {
+  await typeUrlAndClickShorten(invalidUrl);
+}
+
 async function typeUrlAndClickShorten(url: string) {
   await typeUrlIntoInput(url);
   await clickShortenButton();
@@ -47,7 +47,15 @@ async function clickShortenButton() {
 }
 
 async function typeUrlIntoInput(validUrl: string) {
-  await userEvent.type(screen.getByRole('textbox'), validUrl);
+  await userEvent.type(getUrlInput(), validUrl);
+}
+
+async function clearUrlInput() {
+  await userEvent.clear(getUrlInput());
+}
+
+function getUrlInput(): HTMLElement {
+  return screen.getByRole('textbox');
 }
 
 function assertHeadingWithText(text: string) {
@@ -139,7 +147,7 @@ describe('Index', () => {
   test('"Invalid Link" text appears if url is invalid', async () => {
     renderSUT();
 
-    await typeUrlAndClickShorten(invalidUrl);
+    await typeInvalidUrlAndClickShorten();
 
     expect(queryElementByText('Invalid Link')).toBeVisible();
   });
@@ -150,10 +158,12 @@ describe('Index', () => {
     assertInvalidLinkTextIsNotDisplayed();
   });
 
-  test('"Invalid Link" text is not found after a successful request', async () => {
+  test('already existing "Invalid Link" text is removed if url is valid', async () => {
     setRequestResponse(response);
     renderSUT();
 
+    await typeInvalidUrlAndClickShorten();
+    await clearUrlInput();
     await typeValidUrlAndClickShorten();
 
     assertInvalidLinkTextIsNotDisplayed();
@@ -162,7 +172,7 @@ describe('Index', () => {
   test('invalid url does not trigger a request', async () => {
     renderSUT();
 
-    await typeUrlAndClickShorten(invalidUrl);
+    await typeInvalidUrlAndClickShorten();
 
     assertShortenUrlRequestWasNotSent();
   });

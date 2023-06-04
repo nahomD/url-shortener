@@ -36,6 +36,7 @@ export default function Index() {
           <button
             onClick={async () => {
               if (isUrlHttp(link)) {
+                setIsInvalidUrl(false);
                 setShortenedUrl(await shortenUrl(link));
                 setLink('');
               } else setIsInvalidUrl(true);
