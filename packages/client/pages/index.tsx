@@ -13,7 +13,11 @@ export default function Index() {
         Create Short Links
       </h1>
       <div className="rounded shadow-xl py-10 px-7">
-        <div className="flex gap-2 bg-slate-100 p-5 rounded-lg">
+        <div
+          className={`flex gap-2 bg-slate-100 p-5 rounded-lg border-2 ${
+            isInvalidUrl ? 'border-red-400' : 'border-transparent'
+          }`}
+        >
           <svg
             fill="#000000"
             viewBox="0 0 32 32"
@@ -46,7 +50,9 @@ export default function Index() {
             Shorten
           </button>
         </div>
-        {isInvalidUrl && <p>Invalid Link</p>}
+        {isInvalidUrl && (
+          <p className="text-red-600 text-sm pt-2">Invalid Link</p>
+        )}
         {shortenedUrl && (
           <div role="list" className="pt-4">
             <div
