@@ -1,6 +1,9 @@
 import { ShortenedUrl, shortenUrl } from '@/utilities/httpClient';
 import { useState } from 'react';
 import isUrlHttp from 'is-url-http';
+import dynamic from 'next/dynamic';
+
+const Button = dynamic(() => import('@/components/button'), { ssr: false });
 
 export default function Index() {
   const [link, setLink] = useState('');
@@ -9,7 +12,7 @@ export default function Index() {
 
   return (
     <div className="flex flex-col items-center h-screen gap-y-14 justify-center">
-      <h1 className="text-5xl font-semibold text-secondary">
+      <h1 className="text-5xl font-semibold text-sky-600">
         Create Short Links
       </h1>
       <div className="rounded shadow-xl py-10 px-7">
@@ -33,11 +36,13 @@ export default function Index() {
             id="url"
             placeholder="Enter link"
             onChange={(e) => setLink(e.target.value)}
-            className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none text-accent"
+            className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none text-cyan-500"
             value={link}
             autoFocus
           />
-          <button
+          <Button
+            rippleColor="light"
+            className="transition duration-150 ease-in-out px-6 rounded-lg bg-cyan-500 text-white py-2 shadow-md shadow-cyan-500/40 hover:shadow-cyan-500/80 text-lg hover:bg-cyan-600 "
             onClick={async () => {
               if (isUrlHttp(link)) {
                 setShortenedUrl(await shortenUrl(link));
@@ -46,10 +51,9 @@ export default function Index() {
               } else if (link === '') setError('URL is required');
               else setError('Invalid Link');
             }}
-            className="px-6 rounded-lg bg-accent text-white py-2 shadow-md shadow-gray-500 text-lg"
           >
             Shorten
-          </button>
+          </Button>
         </div>
         {error && <p className="text-red-600 text-sm pt-2">{error}</p>}
         {shortenedUrl && (
@@ -59,14 +63,14 @@ export default function Index() {
               className="flex flex-row justify-between items-center gap-x-2 text-lg"
             >
               <p className="grow">{removeProtocol(shortenedUrl.longUrl)}</p>
-              <p className="text-accent">
+              <p className="text-cyan-500">
                 {removeProtocol(shortenedUrl.shortUrl)}
               </p>
               <button
                 onClick={() =>
                   navigator.clipboard.writeText(shortenedUrl.shortUrl)
                 }
-                className="text-accent px-4 py-2 hover:bg-slate-100 rounded-md hover:transition-all"
+                className="text-cyan-500 px-4 py-2 hover:bg-slate-100 rounded-md hover:transition-all"
               >
                 Copy
               </button>
