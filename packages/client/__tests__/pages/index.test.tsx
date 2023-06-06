@@ -154,13 +154,13 @@ describe('Index', () => {
     assertShortenUrlRequestWasNotSent();
   });
 
-  test('"URL is required" text appears if the requested url is empty', async () => {
+  test('"Link is required" text appears if the requested url is empty', async () => {
     renderSUT();
 
     await clickShortenButton();
 
     await waitFor(() => {
-      expect(queryElementByText('URL is required')).toBeVisible();
+      expect(queryElementByText('Link is required')).toBeVisible();
     });
   });
 

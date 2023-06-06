@@ -48,7 +48,7 @@ export default function Index() {
                 setShortenedUrl(await shortenUrl(link));
                 setLink('');
                 setError('');
-              } else if (link === '') setError('URL is required');
+              } else if (link === '') setError('Link is required');
               else setError('Invalid Link');
             }}
           >
