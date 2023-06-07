@@ -43,7 +43,10 @@ export default function Index() {
           />
           <Button
             rippleColor="light"
-            className="transition duration-150 ease-in-out px-6 rounded-lg bg-cyan-500 text-white py-2 shadow-md shadow-cyan-500/40 hover:shadow-cyan-500/80 text-lg hover:bg-cyan-600 "
+            className={`${
+              isLoading &&
+              'cursor-not-allowed bg-cyan-500/60 hover:bg-cyan-500/60 hover:shadow-cyan-500/40'
+            } w-28 h-12 px-6 py-2 text-white text-lg transition duration-150 ease-in-out rounded-lg bg-cyan-500 shadow-md shadow-cyan-500/40 hover:shadow-cyan-500/80 hover:bg-cyan-600`}
             onClick={async () => {
               if (isUrlHttp(link)) {
                 setIsLoading(true);
@@ -57,7 +60,18 @@ export default function Index() {
             disabled={isLoading}
             data-testid="shorten-button"
           >
-            {isLoading ? '' : 'Shorten'}
+            {isLoading ? (
+              <div
+                className="align-middle inline-block h-5 w-5 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                role="status"
+              >
+                <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                  Loading...
+                </span>
+              </div>
+            ) : (
+              'Shorten'
+            )}
           </Button>
         </div>
         {error && <p className="text-red-600 text-sm pt-2">{error}</p>}
