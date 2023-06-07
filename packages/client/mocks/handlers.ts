@@ -11,6 +11,7 @@ export const handlers = [
   rest.post('/api/urls', async (req, res, ctx) => {
     const body = await req.json();
     return res(
+      ctx.delay(2000),
       ctx.json({
         longUrl: body.url,
         shortUrl: 'https://sh.rt/go',

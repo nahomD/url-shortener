@@ -9,6 +9,7 @@ export default function Index() {
   const [link, setLink] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl>();
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="flex flex-col items-center h-screen gap-y-14 justify-center">
@@ -45,14 +46,18 @@ export default function Index() {
             className="transition duration-150 ease-in-out px-6 rounded-lg bg-cyan-500 text-white py-2 shadow-md shadow-cyan-500/40 hover:shadow-cyan-500/80 text-lg hover:bg-cyan-600 "
             onClick={async () => {
               if (isUrlHttp(link)) {
+                setIsLoading(true);
                 setShortenedUrl(await shortenUrl(link));
+                setIsLoading(false);
                 setLink('');
                 setError('');
               } else if (link === '') setError('Link is required');
               else setError('Invalid Link');
             }}
+            disabled={isLoading}
+            data-testid="shorten-button"
           >
-            Shorten
+            {isLoading ? '' : 'Shorten'}
           </Button>
         </div>
         {error && <p className="text-red-600 text-sm pt-2">{error}</p>}

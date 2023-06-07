@@ -9,8 +9,19 @@ jest.mock('@/utilities/httpClient', () => {
   };
 });
 
-function setRequestResponse(resolved: object) {
-  mockShortenUrl.mockResolvedValue(resolved);
+const shortenButtonText = /^shorten/i;
+const validUrl = 'https://google.com/test/path/1';
+const invalidUrl = 'invalid url';
+const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
+
+function setRequestResponse() {
+  mockShortenUrl.mockResolvedValue(response);
+}
+
+function setResponseWithDelay() {
+  mockShortenUrl.mockImplementation(() => {
+    return new Promise((resolve) => setTimeout(() => resolve(response), 250));
+  });
 }
 
 function renderSUT() {
@@ -23,6 +34,10 @@ function getList(): HTMLElement | null {
 
 function queryElementByRole(role: string) {
   return screen.queryByRole(role);
+}
+
+function queryShortenButtonByText(): HTMLElement | null {
+  return queryElementByText(shortenButtonText);
 }
 
 function queryElementByText(text: string | RegExp): HTMLElement | null {
@@ -63,6 +78,10 @@ async function clickCopyButton() {
   await userEvent.click(screen.getByText(/^copy/i));
 }
 
+function removeProtocol(url: string) {
+  return url.slice(8);
+}
+
 function assertHeadingWithText(text: string) {
   const heading = queryElementByRole('heading');
   expect(heading).toBeVisible();
@@ -87,7 +106,7 @@ function assertAListItemIsInsideAList() {
 
 function assertListItemContainsUrlWithoutProtocol(url: string) {
   const listItem = queryElementByRole('listitem');
-  const urlWithNoProtocol = url.slice(8);
+  const urlWithNoProtocol = removeProtocol(url);
   expect(listItem).toHaveTextContent(urlWithNoProtocol);
   expect(listItem).not.toHaveTextContent(url);
 }
@@ -107,10 +126,20 @@ async function assertClipBoardContainsShortUrl() {
   expect(clipText).toBe(response.shortUrl);
 }
 
-const shortenButtonText = /^shorten/i;
-const validUrl = 'https://google.com/test/path/1';
-const invalidUrl = 'invalid url';
-const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
+async function assertWhileLoadingAndAfterLoading(
+  assertWhileLoading: () => void,
+  assertAfterLoading: () => void
+) {
+  const url = removeProtocol(response.shortUrl);
+  await waitFor(() => {
+    expect(queryElementByText(url)).not.toBeInTheDocument();
+    assertWhileLoading();
+  });
+  await waitFor(() => {
+    expect(queryElementByText(url)).toBeInTheDocument();
+    assertAfterLoading();
+  });
+}
 
 describe('Index', () => {
   test('heading is displayed', () => {
@@ -179,7 +208,7 @@ describe('Index', () => {
   });
 
   test('already existing "Invalid Link" text is removed if url is valid', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
 
     await typeInvalidUrlAndClickShorten();
@@ -204,7 +233,7 @@ describe('Index', () => {
   });
 
   test('displays a list after a successful request', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -219,7 +248,7 @@ describe('Index', () => {
   });
 
   test('url input is cleared after a successful request', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -228,7 +257,7 @@ describe('Index', () => {
   });
 
   test('displays a single listitem inside a list after a successful request', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -237,7 +266,7 @@ describe('Index', () => {
   });
 
   test('displays long url after a successful request', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -246,7 +275,7 @@ describe('Index', () => {
   });
 
   test('displays shortened url after a successful request', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -255,7 +284,7 @@ describe('Index', () => {
   });
 
   test('displays a copy button in a listitem after a successful request', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
 
     await typeValidUrlAndClickShorten();
@@ -264,7 +293,7 @@ describe('Index', () => {
   });
 
   test('clicking the copy button copies short url', async () => {
-    setRequestResponse(response);
+    setRequestResponse();
     renderSUT();
     await typeValidUrlAndClickShorten();
 
@@ -272,6 +301,43 @@ describe('Index', () => {
 
     await assertClipBoardContainsShortUrl();
   });
+
+  test('shorten button is disabled while loading and enabled after loading response', async () => {
+    setResponseWithDelay();
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    await assertWhileLoadingAndAfterLoading(
+      assertButtonIsDisabled,
+      assertButtonIsEnabled
+    );
+    function assertButtonIsDisabled() {
+      expect(screen.queryByTestId('shorten-button')).toBeDisabled();
+    }
+    function assertButtonIsEnabled() {
+      expect(queryShortenButtonByText()).toBeEnabled();
+    }
+  }, 10000);
+
+  test('shorten button text is removed while loading response and restored after loading response', async () => {
+    setResponseWithDelay();
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    await assertWhileLoadingAndAfterLoading(
+      assertTextIsRemoved,
+      assertTextIsVisible
+    );
+    function assertTextIsRemoved() {
+      expect(queryShortenButtonByText()).not.toBeInTheDocument();
+    }
+
+    function assertTextIsVisible() {
+      expect(queryShortenButtonByText()).toBeVisible();
+    }
+  }, 10000);
 
   afterEach(() => {
     jest.clearAllMocks();

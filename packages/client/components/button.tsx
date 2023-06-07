@@ -3,14 +3,18 @@ import { ReactNode, useEffect } from 'react';
 
 const Button = ({
   className,
-  rippleColor: color,
+  rippleColor,
   onClick,
   children,
+  disabled,
+  'data-testid': testId,
 }: {
   className?: string;
   rippleColor?: string;
   onClick?: VoidFunction;
   children: ReactNode;
+  disabled?: boolean;
+  'data-testid'?: string;
 }) => {
   useEffect(() => {
     initTE({ Ripple });
@@ -19,9 +23,11 @@ const Button = ({
     <button
       type="button"
       data-te-ripple-init
-      data-te-ripple-color={color}
+      data-te-ripple-color={rippleColor}
       className={className}
       onClick={onClick}
+      disabled={disabled}
+      data-testid={testId}
     >
       {children}
     </button>
