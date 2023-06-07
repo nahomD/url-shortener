@@ -85,14 +85,15 @@ export default function Index() {
               <p className="text-cyan-500">
                 {removeProtocol(shortenedUrl.shortUrl)}
               </p>
-              <button
+              <Button
                 onClick={() =>
                   navigator.clipboard.writeText(shortenedUrl.shortUrl)
                 }
                 className="text-cyan-500 px-4 py-2 hover:bg-slate-100 rounded-md hover:transition-all"
+                rippleColor="light"
               >
                 Copy
-              </button>
+              </Button>
             </div>
           </div>
         )}
