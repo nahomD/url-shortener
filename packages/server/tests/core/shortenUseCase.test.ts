@@ -8,6 +8,7 @@ import { ShortenerService } from '../../src/core/shortenerService';
 
 let storageSpy: StorageSpy;
 let shortenerStub: ShortenerStub;
+let validUrl: string;
 
 function createUseCase() {
   return new ShortenUseCase(storageSpy, shortenerStub);
@@ -16,7 +17,7 @@ function createUseCase() {
 function assertSpyWasCalledWithProperArgument() {
   expect(storageSpy.saveWasCalled).toBe(true);
   expect(storageSpy.savedShortenedUrl).toMatchObject({
-    longUrl: 'https://google.com',
+    longUrl: validUrl,
     shortenedId: shortenerStub.shortenedId,
   });
 }
@@ -36,6 +37,7 @@ function assertShortenerAndSaveWasNotCalled() {
 beforeEach(() => {
   storageSpy = new StorageSpy();
   shortenerStub = new ShortenerStub();
+  validUrl = 'https://google.com';
 });
 
 test('throws if url is empty', async () => {
@@ -56,7 +58,7 @@ test('throws if url is not valid http', async () => {
 test('saves shortened url', async () => {
   const uC = createUseCase();
 
-  await uC.execute('https://google.com');
+  await uC.execute(validUrl);
 
   assertSpyWasCalledWithProperArgument();
 });
@@ -64,15 +66,15 @@ test('saves shortened url', async () => {
 test('returns appropriate response', async () => {
   const uC = createUseCase();
 
-  const response = await uC.execute('https://google.com');
+  const response = await uC.execute(validUrl);
 
   expect(response).toMatchObject({
-    longUrl: 'https://google.com',
+    longUrl: validUrl,
     shortenedId: shortenerStub.shortenedId,
   });
 });
 
-test('does not generate shortened id and save already registered long url', async () => {
+test('does not generate shortened id and does not save already registered long url', async () => {
   const uC = createUseCase();
 
   await uC.execute(storageSpy.preexistingUrl.getLongUrl());
