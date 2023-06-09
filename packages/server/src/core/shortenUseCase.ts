@@ -2,6 +2,8 @@ import { Url } from './url';
 import { ShortenerService } from './shortenerService';
 import { UrlStorage } from './urlStorage';
 import validUrl from 'valid-url';
+import { ValidationError } from './validationError';
+import { ValidationMessages } from './validationMessages';
 
 export class ShortenUseCase {
   constructor(
@@ -18,8 +20,14 @@ export class ShortenUseCase {
   }
 
   private validateLongUrl(longUrl: string) {
-    if (longUrl === '') throw new Error("URL can't be empty");
-    else if (!validUrl.isWebUri(longUrl)) throw new Error('URL is not valid');
+    if (longUrl === '')
+      throw this.createValidationError(ValidationMessages.URL_EMPTY);
+    else if (!validUrl.isWebUri(longUrl))
+      throw this.createValidationError(ValidationMessages.URL_INVALID);
+  }
+
+  private createValidationError(message: string): ValidationError {
+    return new ValidationError(message);
   }
 
   private async findPreexistingUrl(longUrl: string) {

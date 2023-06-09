@@ -5,6 +5,8 @@ import {
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
 import { ShortenerService } from '../../src/core/shortenerService';
+import { ValidationError } from '../../src/core/validationError';
+import { ValidationMessages } from '../../src/core/validationMessages';
 
 let storageSpy: StorageSpy;
 let shortenerStub: ShortenerStub;
@@ -22,11 +24,12 @@ function assertSpyWasCalledWithProperArgument() {
   });
 }
 
-async function assertThrowWithMessage(
+async function assertValidationErrorWithMessage(
   task: () => Promise<ShortenUseCaseResponse>,
   message: string
 ) {
   await expect(task()).rejects.toThrowError(message);
+  await expect(task()).rejects.toThrowError(ValidationError);
 }
 
 function assertShortenerAndSaveWasNotCalled() {
@@ -50,15 +53,18 @@ beforeEach(() => {
 test('throws if url is empty', async () => {
   const uC = createUseCase();
 
-  await assertThrowWithMessage(() => uC.execute(''), "URL can't be empty");
+  await assertValidationErrorWithMessage(
+    () => uC.execute(''),
+    ValidationMessages.URL_EMPTY
+  );
 });
 
 test('throws if url is not valid http', async () => {
   const uC = createUseCase();
 
-  await assertThrowWithMessage(
+  await assertValidationErrorWithMessage(
     () => uC.execute('invalid url'),
-    'URL is not valid'
+    ValidationMessages.URL_INVALID
   );
 });
 
