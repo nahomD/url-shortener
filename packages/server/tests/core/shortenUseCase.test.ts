@@ -34,6 +34,13 @@ function assertShortenerAndSaveWasNotCalled() {
   expect(shortenerStub.wasCalled).toBe(false);
 }
 
+function assertResponsesMatch(
+  response1: ShortenUseCaseResponse,
+  response2: ShortenUseCaseResponse
+) {
+  expect(response1).toMatchObject(response2);
+}
+
 beforeEach(() => {
   storageSpy = new StorageSpy();
   shortenerStub = new ShortenerStub();
@@ -68,7 +75,7 @@ test('returns appropriate response', async () => {
 
   const response = await uC.execute(validUrl);
 
-  expect(response).toMatchObject({
+  assertResponsesMatch(response, {
     longUrl: validUrl,
     shortenedId: shortenerStub.shortenedId,
   });
@@ -87,13 +94,17 @@ test('returns the url of already registered long url', async () => {
 
   const response = await uC.execute(storageSpy.preexistingUrl.getLongUrl());
 
-  expect(response).toMatchObject(storageSpy.preexistingUrl);
+  assertResponsesMatch(response, {
+    longUrl: storageSpy.preexistingUrl.getLongUrl(),
+    shortenedId: storageSpy.preexistingUrl.getShortenedId(),
+  });
 });
 
 class StorageSpy implements UrlStorage {
   saveWasCalled = false;
   savedShortenedUrl: Url;
   preexistingUrl = new Url('https://yahoo.com', 'fe23fe');
+
   async save(shortenedUrl: Url) {
     this.saveWasCalled = true;
     this.savedShortenedUrl = shortenedUrl;
