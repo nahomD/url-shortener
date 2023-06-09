@@ -75,7 +75,7 @@ test('returns appropriate response', async () => {
 test('does not generate shortened id and save already registered long url', async () => {
   const uC = createUseCase();
 
-  await uC.execute(storageSpy.existingUrl.getLongUrl());
+  await uC.execute(storageSpy.preexistingUrl.getLongUrl());
 
   assertShortenerAndSaveWasNotCalled();
 });
@@ -83,22 +83,23 @@ test('does not generate shortened id and save already registered long url', asyn
 test('returns the url of already registered long url', async () => {
   const uC = createUseCase();
 
-  const response = await uC.execute(storageSpy.existingUrl.getLongUrl());
+  const response = await uC.execute(storageSpy.preexistingUrl.getLongUrl());
 
-  expect(response).toMatchObject(storageSpy.existingUrl);
+  expect(response).toMatchObject(storageSpy.preexistingUrl);
 });
 
 class StorageSpy implements UrlStorage {
   saveWasCalled = false;
   savedShortenedUrl: Url;
-  existingUrl = new Url('https://yahoo.com', 'fe23fe');
+  preexistingUrl = new Url('https://yahoo.com', 'fe23fe');
   async save(shortenedUrl: Url) {
     this.saveWasCalled = true;
     this.savedShortenedUrl = shortenedUrl;
   }
 
   async find(longUrl: string): Promise<Url | null> {
-    if (longUrl === this.existingUrl.getLongUrl()) return this.existingUrl;
+    if (longUrl === this.preexistingUrl.getLongUrl())
+      return this.preexistingUrl;
     return null;
   }
 }
