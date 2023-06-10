@@ -4,23 +4,23 @@ import {
 } from '../../src/core/shortenUseCase';
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
-import { ShortenerService } from '../../src/core/shortenerService';
+import { IdGenerator } from '../../src/core/idGenerator';
 import { ValidationError } from '../../src/core/validationError';
 import { ValidationMessages } from '../../src/core/validationMessages';
 
 let storageSpy: StorageSpy;
-let shortenerStub: ShortenerStub;
+let generatorStub: GeneratorStub;
 let validUrl: string;
 
 function createUseCase() {
-  return new ShortenUseCase(storageSpy, shortenerStub);
+  return new ShortenUseCase(storageSpy, generatorStub);
 }
 
 function assertSpyWasCalledWithProperArgument() {
   expect(storageSpy.saveWasCalled).toBe(true);
   expect(storageSpy.savedShortenedUrl).toMatchObject({
     longUrl: validUrl,
-    shortenedId: shortenerStub.shortenedId,
+    shortenedId: generatorStub.generatedId,
   });
 }
 
@@ -32,9 +32,9 @@ async function assertValidationErrorWithMessage(
   await expect(task()).rejects.toThrowError(ValidationError);
 }
 
-function assertShortenerAndSaveWasNotCalled() {
+function assertGeneratorAndSaveWereNotCalled() {
   expect(storageSpy.saveWasCalled).toBe(false);
-  expect(shortenerStub.wasCalled).toBe(false);
+  expect(generatorStub.wasCalled).toBe(false);
 }
 
 function assertResponsesMatch(
@@ -46,7 +46,7 @@ function assertResponsesMatch(
 
 beforeEach(() => {
   storageSpy = new StorageSpy();
-  shortenerStub = new ShortenerStub();
+  generatorStub = new GeneratorStub();
   validUrl = 'https://google.com';
 });
 
@@ -83,7 +83,7 @@ test('returns appropriate response', async () => {
 
   assertResponsesMatch(response, {
     longUrl: validUrl,
-    shortenedId: shortenerStub.shortenedId,
+    shortenedId: generatorStub.generatedId,
   });
 });
 
@@ -92,7 +92,7 @@ test('does not generate shortened id and does not save already registered long u
 
   await uC.execute(storageSpy.preexistingUrl.getLongUrl());
 
-  assertShortenerAndSaveWasNotCalled();
+  assertGeneratorAndSaveWereNotCalled();
 });
 
 test('returns the url of already registered long url', async () => {
@@ -123,11 +123,11 @@ class StorageSpy implements UrlStorage {
   }
 }
 
-class ShortenerStub implements ShortenerService {
+class GeneratorStub implements IdGenerator {
   wasCalled = false;
-  shortenedId = 'fe2344';
-  generateShortenedId(): string {
+  generatedId = 'fe2344';
+  async generateId() {
     this.wasCalled = true;
-    return this.shortenedId;
+    return this.generatedId;
   }
 }
