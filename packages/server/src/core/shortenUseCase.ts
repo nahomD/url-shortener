@@ -17,8 +17,8 @@ export class ShortenUseCase {
   }
 
   private validateLongUrl(longUrl: string) {
-    if (longUrl === '')
-      throw this.createValidationError(ValidationMessages.URL_EMPTY);
+    if (!longUrl)
+      throw this.createValidationError(ValidationMessages.URL_REQUIRED);
     else if (!validUrl.isWebUri(longUrl))
       throw this.createValidationError(ValidationMessages.URL_INVALID);
   }

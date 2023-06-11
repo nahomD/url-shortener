@@ -1,4 +1,4 @@
 export class ValidationMessages {
-  static readonly URL_EMPTY = "URL can't be empty";
+  static readonly URL_REQUIRED = 'URL is required';
   static readonly URL_INVALID = 'URL is not valid';
 }

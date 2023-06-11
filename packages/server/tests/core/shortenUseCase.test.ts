@@ -55,7 +55,18 @@ test('throws if url is empty', async () => {
 
   await assertValidationErrorWithMessage(
     () => uC.execute(''),
-    ValidationMessages.URL_EMPTY
+    ValidationMessages.URL_REQUIRED
+  );
+});
+
+test('throws if url is undefined', async () => {
+  const uC = createUseCase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let url: any;
+
+  await assertValidationErrorWithMessage(
+    () => uC.execute(url),
+    ValidationMessages.URL_REQUIRED
   );
 });
 
