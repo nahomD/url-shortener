@@ -9,6 +9,8 @@ test('generates 2000 9-character unique ids', async () => {
 
     expect(generated.includes(id)).toBe(false);
     expect(id.length).toBe(9);
+    expect(id).not.toMatch(/-/);
+    expect(id).not.toMatch(/_/);
     generated.push(id);
   }
 });
