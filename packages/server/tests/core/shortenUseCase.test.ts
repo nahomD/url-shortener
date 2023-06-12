@@ -95,6 +95,7 @@ test('returns appropriate response', async () => {
   assertResponsesMatch(response, {
     longUrl: validUrl,
     shortenedId: generatorStub.generatedId,
+    preexisting: false,
   });
 });
 
@@ -114,6 +115,7 @@ test('returns the url of already registered long url', async () => {
   assertResponsesMatch(response, {
     longUrl: storageSpy.preexistingUrl.getLongUrl(),
     shortenedId: storageSpy.preexistingUrl.getShortenedId(),
+    preexisting: true,
   });
 });
 

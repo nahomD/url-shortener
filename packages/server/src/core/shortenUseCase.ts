@@ -11,7 +11,7 @@ export class ShortenUseCase {
   async execute(longUrl: string): Promise<ShortenUseCaseResponse> {
     this.validateLongUrl(longUrl);
     const preUrl = await this.findPreexistingUrl(longUrl);
-    if (preUrl) return this.buildResponse(preUrl);
+    if (preUrl) return this.buildResponseForPreexisting(preUrl);
     const newUrl = await this.createNewUrl(longUrl);
     return this.buildResponse(newUrl);
   }
@@ -29,6 +29,10 @@ export class ShortenUseCase {
 
   private async findPreexistingUrl(longUrl: string) {
     return await this.storage.find(longUrl);
+  }
+
+  private buildResponseForPreexisting(preUrl: Url): ShortenUseCaseResponse {
+    return { ...this.buildResponse(preUrl), preexisting: true };
   }
 
   private async createNewUrl(longUrl: string) {
@@ -55,6 +59,7 @@ export class ShortenUseCase {
     return {
       longUrl: url.getLongUrl(),
       shortenedId: url.getShortenedId(),
+      preexisting: false,
     };
   }
 }
@@ -62,4 +67,5 @@ export class ShortenUseCase {
 export interface ShortenUseCaseResponse {
   longUrl: string;
   shortenedId: string;
+  preexisting: boolean;
 }
