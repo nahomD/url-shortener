@@ -29,7 +29,9 @@ class PostUrl {
   }
 
   private sendResponse(res: Response, result: ShortenUseCaseResponse) {
-    res.status(201).json(this.buildResponse(result));
+    const status = result.preexisting ? 200 : 201;
+    res.status(status);
+    res.json(this.buildResponse(result));
   }
 
   private buildResponse(result: ShortenUseCaseResponse) {
