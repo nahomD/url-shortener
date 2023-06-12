@@ -33,7 +33,7 @@ export class ShortenUseCase {
 
   private async createNewUrl(longUrl: string) {
     const shortenedId = await this.generateShortenedId();
-    const url = this.createUrl(longUrl, shortenedId);
+    const url = this.buildUrl(longUrl, shortenedId);
     await this.saveUrl(url);
     return url;
   }
@@ -42,7 +42,7 @@ export class ShortenUseCase {
     return await this.generator.generateId();
   }
 
-  private createUrl(longUrl: string, shortenedId: string) {
+  private buildUrl(longUrl: string, shortenedId: string) {
     const url = new Url(longUrl, shortenedId);
     return url;
   }
