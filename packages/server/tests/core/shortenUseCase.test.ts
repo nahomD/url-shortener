@@ -4,9 +4,9 @@ import {
 } from '../../src/core/shortenUseCase';
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
-import { IdGenerator } from '../../src/core/idGenerator';
 import { ValidationError } from '../../src/core/validationError';
 import { ValidationMessages } from '../../src/core/validationMessages';
+import { GeneratorStub } from './generatorStub';
 
 let storageSpy: StorageSpy;
 let generatorStub: GeneratorStub;
@@ -131,14 +131,5 @@ class StorageSpy implements UrlStorage {
     if (longUrl === this.preexistingUrl.getLongUrl())
       return this.preexistingUrl;
     return null;
-  }
-}
-
-class GeneratorStub implements IdGenerator {
-  wasCalled = false;
-  generatedId = 'fe2344';
-  async generateId() {
-    this.wasCalled = true;
-    return this.generatedId;
   }
 }

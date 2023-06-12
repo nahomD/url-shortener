@@ -1,5 +1,5 @@
 import { Verifier } from '@pact-foundation/pact';
-import app from '../src/app';
+import app from '../src/adapter-restapi-express/app';
 import path from 'path';
 
 const port = 8081;
