@@ -7,24 +7,28 @@ import { UrlStorage } from '../../src/core/urlStorage';
 import { ValidationMessages } from '../../src/core/validationMessages';
 import { GeneratorSpy } from './generatorSpy';
 import { assertValidationErrorWithMessage } from './utilities';
+import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
 
-let storageSpy: StorageSpy;
+const url = new Url('https://yahoo.com', 'fe23fe');
+
 let generatorSpy: GeneratorSpy;
-let validUrl: string;
 
-function createUseCase() {
-  return new ShortenUseCase(storageSpy, generatorSpy);
+function createUseCase(storage?: UrlStorage) {
+  generatorSpy = new GeneratorSpy();
+  return new ShortenUseCase(storage || createStorage(), generatorSpy);
 }
 
-function assertSpyWasCalledWithProperArgument() {
-  expect(storageSpy.saveWasCalled).toBe(true);
-  expect(storageSpy.savedShortenedUrl).toMatchObject({
-    longUrl: validUrl,
-    shortenedId: generatorSpy.generatedId,
-  });
+function createStorage() {
+  return new FakeUrlStorage();
 }
 
-function assertGeneratorAndSaveWereNotCalled() {
+async function assertUrlWasSaved(storage: FakeUrlStorage) {
+  expect(await storage.findByLongUrl(url.getLongUrl())).toMatchObject(
+    new Url(url.getLongUrl(), generatorSpy.generatedId)
+  );
+}
+
+function assertGeneratorAndSaveWereNotCalled(storageSpy: StorageSpy) {
   expect(storageSpy.saveWasCalled).toBe(false);
   expect(generatorSpy.wasCalled).toBe(false);
 }
@@ -35,12 +39,6 @@ function assertResponsesMatch(
 ) {
   expect(response1).toMatchObject(response2);
 }
-
-beforeEach(() => {
-  storageSpy = new StorageSpy();
-  generatorSpy = new GeneratorSpy();
-  validUrl = 'https://google.com';
-});
 
 test('throws if url is empty', async () => {
   const uC = createUseCase();
@@ -72,62 +70,62 @@ test('throws if url is not valid http', async () => {
 });
 
 test('saves shortened url', async () => {
-  const uC = createUseCase();
+  const storage = createStorage();
+  const uC = createUseCase(storage);
 
-  await uC.execute(validUrl);
+  await uC.execute(url.getLongUrl());
 
-  assertSpyWasCalledWithProperArgument();
+  await assertUrlWasSaved(storage);
 });
 
-test('returns appropriate response', async () => {
+test('returns correct response for a new url', async () => {
   const uC = createUseCase();
 
-  const response = await uC.execute(validUrl);
+  const response = await uC.execute(url.getLongUrl());
 
   assertResponsesMatch(response, {
-    longUrl: validUrl,
+    longUrl: url.getLongUrl(),
     shortenedId: generatorSpy.generatedId,
     preexisting: false,
   });
 });
 
-test('does not generate shortened id and does not save already registered long url', async () => {
-  const uC = createUseCase();
+test('does not save and generate id for a preexisting url', async () => {
+  const spy = new StorageSpy();
+  const uC = createUseCase(spy);
 
-  await uC.execute(storageSpy.preexistingUrl.getLongUrl());
+  await uC.execute(spy.preexistingUrl.getLongUrl());
 
-  assertGeneratorAndSaveWereNotCalled();
+  assertGeneratorAndSaveWereNotCalled(spy);
 });
 
-test('returns the url of already registered long url', async () => {
-  const uC = createUseCase();
+test('returns correct response for a preexisting url', async () => {
+  const storage = createStorage();
+  storage.save(url);
+  const uC = createUseCase(storage);
 
-  const response = await uC.execute(storageSpy.preexistingUrl.getLongUrl());
+  const response = await uC.execute(url.getLongUrl());
 
   assertResponsesMatch(response, {
-    longUrl: storageSpy.preexistingUrl.getLongUrl(),
-    shortenedId: storageSpy.preexistingUrl.getShortenedId(),
+    longUrl: url.getLongUrl(),
+    shortenedId: url.getShortenedId(),
     preexisting: true,
   });
 });
 
 class StorageSpy implements UrlStorage {
   saveWasCalled = false;
-  savedShortenedUrl: Url;
-  preexistingUrl = new Url('https://yahoo.com', 'fe23fe');
+  preexistingUrl = url;
 
   findById(): Promise<Url | null> {
     throw new Error('Method not implemented.');
   }
 
-  async save(shortenedUrl: Url) {
+  async save() {
     this.saveWasCalled = true;
-    this.savedShortenedUrl = shortenedUrl;
   }
 
-  async findByLongUrl(longUrl: string): Promise<Url | null> {
-    if (longUrl === this.preexistingUrl.getLongUrl())
-      return this.preexistingUrl;
-    return null;
+  async findByLongUrl(): Promise<Url | null> {
+    return this.preexistingUrl;
   }
 }
