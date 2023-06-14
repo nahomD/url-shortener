@@ -3,4 +3,5 @@ export class ValidationMessages {
   static readonly URL_INVALID = 'URL is not valid';
   static readonly ID_REQUIRED = 'Id is required';
   static readonly ID_INVALID = 'Id is invalid';
+  static readonly ID_DOES_NOT_EXIST = 'Id does not exist';
 }

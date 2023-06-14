@@ -10,7 +10,7 @@ export class RedirectUseCase {
     this.validateId(shortenedId);
     const url = await this.findUrlById(shortenedId);
     if (this.isNotFound(url))
-      throw this.buildValidationError('Id does not exist');
+      throw this.buildValidationError(ValidationMessages.ID_DOES_NOT_EXIST);
     return url.getLongUrl();
   }
 
