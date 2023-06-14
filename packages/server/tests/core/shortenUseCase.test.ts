@@ -4,12 +4,13 @@ import {
 } from '../../src/core/shortenUseCase';
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
-import { ValidationMessages } from '../../src/core/validationMessages';
 import { GeneratorSpy } from './generatorSpy';
 import { assertValidationErrorWithMessage } from './utilities';
 import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
 
 const url = new Url('https://yahoo.com', 'fe23fe');
+const URL_REQUIRED = 'URL is required';
+const URL_INVALID = 'URL is not valid';
 
 let generatorSpy: GeneratorSpy;
 
@@ -43,10 +44,7 @@ function assertResponsesMatch(
 test('throws if url is empty', async () => {
   const uC = createUseCase();
 
-  await assertValidationErrorWithMessage(
-    () => uC.execute(''),
-    ValidationMessages.URL_REQUIRED
-  );
+  await assertValidationErrorWithMessage(() => uC.execute(''), URL_REQUIRED);
 });
 
 test('throws if url is undefined', async () => {
@@ -54,10 +52,7 @@ test('throws if url is undefined', async () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let url: any;
 
-  await assertValidationErrorWithMessage(
-    () => uC.execute(url),
-    ValidationMessages.URL_REQUIRED
-  );
+  await assertValidationErrorWithMessage(() => uC.execute(url), URL_REQUIRED);
 });
 
 test('throws if url is not valid http', async () => {
@@ -65,7 +60,7 @@ test('throws if url is not valid http', async () => {
 
   await assertValidationErrorWithMessage(
     () => uC.execute('invalid url'),
-    ValidationMessages.URL_INVALID
+    URL_INVALID
   );
 });
 
