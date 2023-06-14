@@ -124,6 +124,10 @@ class StorageSpy implements UrlStorage {
   savedShortenedUrl: Url;
   preexistingUrl = new Url('https://yahoo.com', 'fe23fe');
 
+  findById(): Promise<Url | null> {
+    throw new Error('Method not implemented.');
+  }
+
   async save(shortenedUrl: Url) {
     this.saveWasCalled = true;
     this.savedShortenedUrl = shortenedUrl;

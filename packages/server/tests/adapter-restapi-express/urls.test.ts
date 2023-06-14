@@ -98,6 +98,10 @@ describe('POST /api/urls', () => {
 class PreexistingStorageStub implements UrlStorage {
   preexistingUrl = new Url(longUrl, 'f1234');
 
+  findById(): Promise<Url | null> {
+    throw new Error('Method not implemented.');
+  }
+
   async findByLongUrl() {
     return this.preexistingUrl;
   }
@@ -106,9 +110,14 @@ class PreexistingStorageStub implements UrlStorage {
 }
 
 class ExceptionStorageStub implements UrlStorage {
+  findById(): Promise<Url | null> {
+    throw new Error('Method not implemented.');
+  }
+
   async findByLongUrl(): Promise<Url | null> {
     throw new Error();
   }
+
   async save() {
     throw new Error();
   }

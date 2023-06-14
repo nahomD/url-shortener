@@ -9,10 +9,18 @@ export class FakeUrlStorage implements UrlStorage {
   }
 
   async findByLongUrl(longUrl: string): Promise<Url> {
-    return this.findUrl(longUrl);
+    return this.findLongUrl(longUrl);
   }
 
-  private findUrl(longUrl: string) {
+  private findLongUrl(longUrl: string) {
     return this.urls.find((e) => e.getLongUrl() === longUrl) || null;
+  }
+
+  async findById(id: string): Promise<Url> {
+    return this.findId(id);
+  }
+
+  private findId(id: string): Url {
+    return this.urls.find((e) => e.getShortenedId() === id) || null;
   }
 }
