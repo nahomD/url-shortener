@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../src/adapter-restapi-express/app';
 import { ValidationMessages } from '../../src/core/validationMessages';
 import Context from '../../src/adapter-restapi-express/context';
-import { GeneratorStub } from '../core/generatorStub';
+import { GeneratorSpy } from '../core/generatorSpy';
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
 import { IdGenerator } from '../../src/core/idGenerator';
@@ -55,8 +55,8 @@ describe('POST /api/urls', () => {
   });
 
   test('returns 201 with proper body for a valid long url', async () => {
-    const gStub = new GeneratorStub();
-    stubIdGenerator(gStub);
+    const gSpy = new GeneratorSpy();
+    stubIdGenerator(gSpy);
 
     setHost(host);
     const response = await sendRequest({ url: longUrl });
@@ -64,7 +64,7 @@ describe('POST /api/urls', () => {
     assertStatusCode(response, 201);
     assertBody(response, {
       longUrl,
-      shortUrl: `https://${host}/${gStub.generatedId}`,
+      shortUrl: `https://${host}/${gSpy.generatedId}`,
     });
   });
 

@@ -1,6 +1,6 @@
 import { IdGenerator } from '../../src/core/idGenerator';
 
-export class GeneratorStub implements IdGenerator {
+export class GeneratorSpy implements IdGenerator {
   wasCalled = false;
   generatedId = 'fe2344';
   async generateId() {

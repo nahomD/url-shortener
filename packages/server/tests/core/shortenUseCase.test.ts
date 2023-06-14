@@ -5,28 +5,28 @@ import {
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
 import { ValidationMessages } from '../../src/core/validationMessages';
-import { GeneratorStub } from './generatorStub';
+import { GeneratorSpy } from './generatorSpy';
 import { assertValidationErrorWithMessage } from './utilities';
 
 let storageSpy: StorageSpy;
-let generatorStub: GeneratorStub;
+let generatorSpy: GeneratorSpy;
 let validUrl: string;
 
 function createUseCase() {
-  return new ShortenUseCase(storageSpy, generatorStub);
+  return new ShortenUseCase(storageSpy, generatorSpy);
 }
 
 function assertSpyWasCalledWithProperArgument() {
   expect(storageSpy.saveWasCalled).toBe(true);
   expect(storageSpy.savedShortenedUrl).toMatchObject({
     longUrl: validUrl,
-    shortenedId: generatorStub.generatedId,
+    shortenedId: generatorSpy.generatedId,
   });
 }
 
 function assertGeneratorAndSaveWereNotCalled() {
   expect(storageSpy.saveWasCalled).toBe(false);
-  expect(generatorStub.wasCalled).toBe(false);
+  expect(generatorSpy.wasCalled).toBe(false);
 }
 
 function assertResponsesMatch(
@@ -38,7 +38,7 @@ function assertResponsesMatch(
 
 beforeEach(() => {
   storageSpy = new StorageSpy();
-  generatorStub = new GeneratorStub();
+  generatorSpy = new GeneratorSpy();
   validUrl = 'https://google.com';
 });
 
@@ -86,7 +86,7 @@ test('returns appropriate response', async () => {
 
   assertResponsesMatch(response, {
     longUrl: validUrl,
-    shortenedId: generatorStub.generatedId,
+    shortenedId: generatorSpy.generatedId,
     preexisting: false,
   });
 });
