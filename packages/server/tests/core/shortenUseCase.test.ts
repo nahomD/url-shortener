@@ -4,9 +4,9 @@ import {
 } from '../../src/core/shortenUseCase';
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
-import { ValidationError } from '../../src/core/validationError';
 import { ValidationMessages } from '../../src/core/validationMessages';
 import { GeneratorStub } from './generatorStub';
+import { assertValidationErrorWithMessage } from './utilities';
 
 let storageSpy: StorageSpy;
 let generatorStub: GeneratorStub;
@@ -22,14 +22,6 @@ function assertSpyWasCalledWithProperArgument() {
     longUrl: validUrl,
     shortenedId: generatorStub.generatedId,
   });
-}
-
-async function assertValidationErrorWithMessage(
-  task: () => Promise<ShortenUseCaseResponse>,
-  message: string
-) {
-  await expect(task()).rejects.toThrowError(message);
-  await expect(task()).rejects.toThrowError(ValidationError);
 }
 
 function assertGeneratorAndSaveWereNotCalled() {
