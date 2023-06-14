@@ -1,12 +1,12 @@
 import { Url } from './url';
-import { IdGenerator } from './idGenerator';
+import { UrlIdGenerator } from './urlIdGenerator';
 import { UrlStorage } from './urlStorage';
 import validUrl from 'valid-url';
 import { ValidationError } from './validationError';
 import { ValidationMessages } from './validationMessages';
 
 export class ShortenUseCase {
-  constructor(private storage: UrlStorage, private generator: IdGenerator) {}
+  constructor(private storage: UrlStorage, private generator: UrlIdGenerator) {}
 
   async execute(longUrl: string): Promise<ShortenUseCaseResponse> {
     this.validateLongUrl(longUrl);
@@ -43,7 +43,7 @@ export class ShortenUseCase {
   }
 
   private async generateShortenedId() {
-    return await this.generator.generateId();
+    return (await this.generator.generateUrlId()).getId();
   }
 
   private buildUrl(longUrl: string, shortenedId: string) {

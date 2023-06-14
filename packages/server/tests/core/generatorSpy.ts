@@ -1,10 +1,12 @@
-import { IdGenerator } from '../../src/core/idGenerator';
+import { UrlIdGenerator } from '../../src/core/urlIdGenerator';
+import { UrlId } from '../../src/core/urlId';
 
-export class GeneratorSpy implements IdGenerator {
+export class GeneratorSpy implements UrlIdGenerator {
   wasCalled = false;
-  generatedId = 'fe2344';
-  async generateId() {
+  generatedId = 'fe3456789';
+
+  async generateUrlId(): Promise<UrlId> {
     this.wasCalled = true;
-    return this.generatedId;
+    return new UrlId(this.generatedId);
   }
 }

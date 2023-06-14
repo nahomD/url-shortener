@@ -5,13 +5,12 @@ import Context from '../../src/adapter-restapi-express/context';
 import { GeneratorSpy } from '../core/generatorSpy';
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
-import { IdGenerator } from '../../src/core/idGenerator';
 
 const longUrl = 'https://google.com';
 const host = 'sh.rt';
 
-function stubIdGenerator(gStub: IdGenerator) {
-  Context.idGenerator = gStub;
+function stubUrlIdGenerator(gSpy: GeneratorSpy) {
+  Context.urlIdGenerator = gSpy;
 }
 
 function setHost(host: string) {
@@ -56,7 +55,7 @@ describe('POST /api/urls', () => {
 
   test('returns 201 with proper body for a valid long url', async () => {
     const gSpy = new GeneratorSpy();
-    stubIdGenerator(gSpy);
+    stubUrlIdGenerator(gSpy);
 
     setHost(host);
     const response = await sendRequest({ url: longUrl });

@@ -25,7 +25,7 @@ class PostUrl {
   }
 
   private buildShortenUseCase() {
-    return new ShortenUseCase(Context.urlStorage, Context.idGenerator);
+    return new ShortenUseCase(Context.urlStorage, Context.urlIdGenerator);
   }
 
   private sendResponse(res: Response, result: ShortenUseCaseResponse) {
