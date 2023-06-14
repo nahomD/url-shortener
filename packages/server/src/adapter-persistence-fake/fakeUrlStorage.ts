@@ -8,7 +8,7 @@ export class FakeUrlStorage implements UrlStorage {
     this.urls.push(shortenedUrl);
   }
 
-  async find(longUrl: string): Promise<Url> {
+  async findByLongUrl(longUrl: string): Promise<Url> {
     return this.findUrl(longUrl);
   }
 

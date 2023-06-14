@@ -14,10 +14,6 @@ function stubIdGenerator(gStub: IdGenerator) {
   Context.idGenerator = gStub;
 }
 
-function stubUrlStorage(storageStub: UrlStorage) {
-  Context.urlStorage = storageStub;
-}
-
 function setHost(host: string) {
   process.env.HOST = host;
 }
@@ -73,15 +69,7 @@ describe('POST /api/urls', () => {
   });
 
   test('returns 500 for non validation exception', async () => {
-    const exception = new Error('Storage exception');
-    stubUrlStorage({
-      find() {
-        throw exception;
-      },
-      save() {
-        throw exception;
-      },
-    });
+    Context.urlStorage = new ExceptionStorageStub();
 
     const response = await sendRequest({ url: longUrl });
 
@@ -92,22 +80,36 @@ describe('POST /api/urls', () => {
   });
 
   test('returns 200 for a preexisting url', async () => {
-    const preexistingUrl = new Url(longUrl, 'f1234');
-    stubUrlStorage({
-      async find() {
-        return preexistingUrl;
-      },
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      async save() {},
-    });
+    const stub = new PreexistingStorageStub();
+    const preexistingUrl = stub.preexistingUrl;
+    Context.urlStorage = stub;
 
     setHost(host);
     const response = await sendRequest({ url: preexistingUrl.getLongUrl() });
 
     assertStatusCode(response, 200);
     assertBody(response, {
-      longUrl,
+      longUrl: preexistingUrl.getLongUrl(),
       shortUrl: `https://${host}/${preexistingUrl.getShortenedId()}`,
     });
   });
 });
+
+class PreexistingStorageStub implements UrlStorage {
+  preexistingUrl = new Url(longUrl, 'f1234');
+
+  async findByLongUrl() {
+    return this.preexistingUrl;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async save() {}
+}
+
+class ExceptionStorageStub implements UrlStorage {
+  async findByLongUrl(): Promise<Url | null> {
+    throw new Error();
+  }
+  async save() {
+    throw new Error();
+  }
+}

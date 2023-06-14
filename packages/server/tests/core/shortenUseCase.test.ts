@@ -129,7 +129,7 @@ class StorageSpy implements UrlStorage {
     this.savedShortenedUrl = shortenedUrl;
   }
 
-  async find(longUrl: string): Promise<Url | null> {
+  async findByLongUrl(longUrl: string): Promise<Url | null> {
     if (longUrl === this.preexistingUrl.getLongUrl())
       return this.preexistingUrl;
     return null;

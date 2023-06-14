@@ -28,7 +28,7 @@ export class ShortenUseCase {
   }
 
   private async findPreexistingUrl(longUrl: string) {
-    return await this.storage.find(longUrl);
+    return await this.storage.findByLongUrl(longUrl);
   }
 
   private buildResponseForPreexisting(preUrl: Url): ShortenUseCaseResponse {

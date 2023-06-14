@@ -1,12 +1,13 @@
 import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
 import { Url } from '../../src/core/url';
+import { UrlStorage } from '../../src/core/urlStorage';
 
-function createFakeUrlStorage() {
+function createFakeUrlStorage(): UrlStorage {
   return new FakeUrlStorage();
 }
 
-function assertUrlsMatch(url1: Url, url2: Url) {
-  expect(url1).toMatchObject(url2);
+function assertObjectsMatch(obj1, obj2) {
+  expect(obj1).toMatchObject(obj2);
 }
 
 let url1;
@@ -20,16 +21,16 @@ beforeEach(() => {
 test('"find" returns null if there are no saves', async () => {
   const fUS = createFakeUrlStorage();
 
-  expect(await fUS.find(url1.getLongUrl())).toBeNull();
+  expect(await fUS.findByLongUrl(url1.getLongUrl())).toBeNull();
 });
 
 test('"find" works for a saved url', async () => {
   const fUS = createFakeUrlStorage();
-
   await fUS.save(url1);
 
-  const found = await fUS.find(url1.getLongUrl());
-  assertUrlsMatch(found, url1);
+  const found = await fUS.findByLongUrl(url1.getLongUrl());
+
+  assertObjectsMatch(found, url1);
 });
 
 test('"find" works for two saved urls', async () => {
@@ -38,8 +39,8 @@ test('"find" works for two saved urls', async () => {
   await fUS.save(url1);
   await fUS.save(url2);
 
-  assertUrlsMatch(await fUS.find(url1.getLongUrl()), url1);
-  assertUrlsMatch(await fUS.find(url2.getLongUrl()), url2);
+  assertObjectsMatch(await fUS.findByLongUrl(url1.getLongUrl()), url1);
+  assertObjectsMatch(await fUS.findByLongUrl(url2.getLongUrl()), url2);
 });
 
 test('"find" returns null if url is not saved', async () => {
@@ -47,5 +48,5 @@ test('"find" returns null if url is not saved', async () => {
 
   await fUS.save(url2);
 
-  expect(await fUS.find(url1.getLongUrl())).toBeNull();
+  expect(await fUS.findByLongUrl(url1.getLongUrl())).toBeNull();
 });
