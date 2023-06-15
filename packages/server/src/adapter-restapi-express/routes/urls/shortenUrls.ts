@@ -1,13 +1,19 @@
-import express, { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import * as Joi from 'joi';
-import { ShortenUseCase, ShortenUseCaseResponse } from '../core/shortenUseCase';
-import Context from './context';
-import { ValidationError } from '../core/validationError';
-import { ValidationMessages } from '../core/validationMessages';
+import {
+  ShortenUseCase,
+  ShortenUseCaseResponse,
+} from '../../../core/shortenUseCase';
+import Context from '../../context';
+import { ValidationError } from '../../../core/validationError';
+import { ValidationMessages } from '../../../core/validationMessages';
 
-const router = express.Router();
+export class ShortenUrls {
+  static getHandlers(): Array<RequestHandler> {
+    const pU = new ShortenUrls();
+    return [pU.validate.bind(pU), pU.handle.bind(pU)];
+  }
 
-class PostUrl {
   validate(req: Request, res: Response, next: NextFunction) {
     const result = this.getValidationResult(req);
     if (result.error)
@@ -77,12 +83,3 @@ class PostUrl {
     res.json(body);
   }
 }
-
-const postUrl = new PostUrl();
-router.post(
-  '/urls',
-  postUrl.validate.bind(postUrl),
-  postUrl.handle.bind(postUrl)
-);
-
-export default router;
