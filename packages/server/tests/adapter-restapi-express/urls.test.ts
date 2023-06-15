@@ -92,6 +92,12 @@ describe('POST /api/urls', () => {
       shortUrl: `https://${host}/${preexistingUrl.getShortenedId()}`,
     });
   });
+
+  test('returns 400 if url is not string', async () => {
+    const response = await sendRequest({ url: 1234 });
+
+    assertBadRequestWithMessage(response, ValidationMessages.URL_INVALID);
+  });
 });
 
 class PreexistingStorageStub implements UrlStorage {
