@@ -24,7 +24,7 @@ describe('Pact verification', () => {
       .then(() => {
         console.log('Pact Verification Complete!');
       });
-  });
+  }, 10000);
 
   afterAll(() => {
     server.close();

@@ -5,6 +5,13 @@ import Context from '../../src/adapter-restapi-express/context';
 import { GeneratorSpy } from '../core/generatorSpy';
 import { Url } from '../../src/core/url';
 import { UrlStorage } from '../../src/core/urlStorage';
+import { ExceptionStorageStub } from './ExceptionStorageStub';
+import {
+  Messages,
+  assertBadRequestWithMessage,
+  assertBody,
+  assertStatusCode,
+} from './utilities';
 
 const longUrl = 'https://google.com';
 const host = 'sh.rt';
@@ -19,19 +26,6 @@ function setHost(host: string) {
 
 async function sendRequest(body) {
   return await request(app).post('/api/urls').send(body);
-}
-
-function assertBadRequestWithMessage(response, message: string) {
-  assertStatusCode(response, 400);
-  assertBody(response, { message: message });
-}
-
-function assertStatusCode(response, statusCode: number) {
-  expect(response.statusCode).toBe(statusCode);
-}
-
-function assertBody(response, body: unknown) {
-  expect(response.body).toEqual(body);
 }
 
 describe('POST /api/urls', () => {
@@ -74,7 +68,7 @@ describe('POST /api/urls', () => {
 
     assertStatusCode(response, 500);
     assertBody(response, {
-      message: 'Server Error',
+      message: Messages.SERVER_ERROR,
     });
   });
 
@@ -112,18 +106,4 @@ class PreexistingStorageStub implements UrlStorage {
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async save() {}
-}
-
-class ExceptionStorageStub implements UrlStorage {
-  findById(): Promise<Url | null> {
-    throw new Error('Method not implemented.');
-  }
-
-  async findByLongUrl(): Promise<Url | null> {
-    throw new Error();
-  }
-
-  async save() {
-    throw new Error();
-  }
 }
