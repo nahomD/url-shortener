@@ -61,7 +61,7 @@ describe('POST /api/urls', () => {
     });
   });
 
-  test('responds 500 for non validation exception', async () => {
+  test('responds 500 for unknown exception', async () => {
     Context.urlStorage = new ExceptionStorageStub();
 
     const response = await sendRequest({ url: longUrl });
