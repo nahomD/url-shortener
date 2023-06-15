@@ -41,19 +41,19 @@ describe('POST /api/urls', () => {
     assertBadRequestWithMessage(response, ValidationMessages.URL_INVALID);
   });
 
-  test('returns 400 with proper message for empty url', async () => {
+  test('responds 400 with proper message for empty url', async () => {
     const response = await sendRequest({ url: '' });
 
     assertBadRequestWithMessage(response, ValidationMessages.URL_REQUIRED);
   });
 
-  test('returns 400 with proper message for undefined url', async () => {
+  test('responds 400 with proper message for undefined url', async () => {
     const response = await sendRequest({});
 
     assertBadRequestWithMessage(response, ValidationMessages.URL_REQUIRED);
   });
 
-  test('returns 201 with proper body for a valid long url', async () => {
+  test('responds 201 with proper body for a valid long url', async () => {
     const gSpy = new GeneratorSpy();
     stubUrlIdGenerator(gSpy);
 
@@ -67,7 +67,7 @@ describe('POST /api/urls', () => {
     });
   });
 
-  test('returns 500 for non validation exception', async () => {
+  test('responds 500 for non validation exception', async () => {
     Context.urlStorage = new ExceptionStorageStub();
 
     const response = await sendRequest({ url: longUrl });
@@ -78,7 +78,7 @@ describe('POST /api/urls', () => {
     });
   });
 
-  test('returns 200 for a preexisting url', async () => {
+  test('responds 200 for a preexisting url', async () => {
     const stub = new PreexistingStorageStub();
     const preexistingUrl = stub.preexistingUrl;
     Context.urlStorage = stub;
@@ -93,7 +93,7 @@ describe('POST /api/urls', () => {
     });
   });
 
-  test('returns 400 if url is not string', async () => {
+  test('responds 400 if url is not string', async () => {
     const response = await sendRequest({ url: 1234 });
 
     assertBadRequestWithMessage(response, ValidationMessages.URL_INVALID);
