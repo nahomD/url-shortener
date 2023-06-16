@@ -10,14 +10,13 @@ import { ValidationMessages } from '../../../core/validationMessages';
 
 export class ShortenUrls {
   static getHandlers(): Array<RequestHandler> {
-    const pU = new ShortenUrls();
-    return [pU.validate.bind(pU), pU.handle.bind(pU)];
+    const sU = new ShortenUrls();
+    return [sU.validate.bind(sU), sU.handle.bind(sU)];
   }
 
   validate(req: Request, res: Response, next: NextFunction) {
     const result = this.getValidationResult(req);
-    if (result.error)
-      this.respond400WithValidationMessage(res, ValidationMessages.URL_INVALID);
+    if (this.hasError(result)) next(this.buildInvalidUrlError());
     else next();
   }
 
@@ -27,13 +26,19 @@ export class ShortenUrls {
     return result;
   }
 
-  async handle(req: Request, res: Response) {
+  private hasError(result: Joi.ValidationResult<string>) {
+    return result.error;
+  }
+
+  private buildInvalidUrlError(): ValidationError {
+    return new ValidationError(ValidationMessages.URL_INVALID);
+  }
+
+  async handle(req: Request, res: Response, next: NextFunction) {
     try {
       await this.tryHandle(req, res);
     } catch (error) {
-      if (this.isValidationError(error))
-        this.respond400WithValidationMessage(res, error.message);
-      else this.respond500WithGenericMessage(res);
+      next(error);
     }
   }
 
@@ -51,6 +56,11 @@ export class ShortenUrls {
     this.respond(res, this.calculateStatus(result), this.buildBody(result));
   }
 
+  private respond(res: Response, status: number, body) {
+    res.status(status);
+    res.json(body);
+  }
+
   private calculateStatus(result: ShortenUseCaseResponse) {
     return result.preexisting ? 200 : 201;
   }
@@ -64,22 +74,5 @@ export class ShortenUrls {
 
   private buildShortUrl(shortenedId: string) {
     return `https://${process.env.DOMAIN}/${shortenedId}`;
-  }
-
-  private isValidationError(error: unknown) {
-    return error instanceof ValidationError;
-  }
-
-  private respond400WithValidationMessage(res: Response, message: string) {
-    this.respond(res, 400, { message });
-  }
-
-  private respond500WithGenericMessage(res: Response) {
-    this.respond(res, 500, { message: 'Server Error' });
-  }
-
-  private respond(res: Response, status: number, body) {
-    res.status(status);
-    res.json(body);
   }
 }
