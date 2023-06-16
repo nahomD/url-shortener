@@ -2,9 +2,9 @@ import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { RedirectUseCase } from '../../../core/redirectUseCase';
 import Context from '../../context';
 
-export class RedirectUrls {
+export class RedirectUrlsRoute {
   static getHandlers(): Array<RequestHandler> {
-    const rU = new RedirectUrls();
+    const rU = new RedirectUrlsRoute();
     return [rU.handle.bind(rU)];
   }
 

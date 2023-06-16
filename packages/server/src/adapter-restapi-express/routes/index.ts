@@ -1,14 +1,14 @@
 import express from 'express';
-import { ShortenUrls } from './urls/shortenUrls';
-import { RedirectUrls } from './urls/redirectUrls';
+import { ShortenUrlsRoute } from './urls/shortenUrlsRoute';
+import { RedirectUrlsRoute } from './urls/redirectUrlsRoute';
 import { ErrorHandler } from './errorHandler';
 
 const router = express.Router();
 
-const rUHandlers = RedirectUrls.getHandlers();
-router.get('/', rUHandlers);
-router.get('/:id', rUHandlers);
-router.post('/api/urls', ShortenUrls.getHandlers());
+const rURhandlers = RedirectUrlsRoute.getHandlers();
+router.get('/', rURhandlers);
+router.get('/:id', rURhandlers);
+router.post('/api/urls', ShortenUrlsRoute.getHandlers());
 
 router.use(ErrorHandler.getHandlers());
 

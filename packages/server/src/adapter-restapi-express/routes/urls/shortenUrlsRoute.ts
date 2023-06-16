@@ -8,9 +8,9 @@ import Context from '../../context';
 import { ValidationError } from '../../../core/validationError';
 import { ValidationMessages } from '../../../core/validationMessages';
 
-export class ShortenUrls {
+export class ShortenUrlsRoute {
   static getHandlers(): Array<RequestHandler> {
-    const sU = new ShortenUrls();
+    const sU = new ShortenUrlsRoute();
     return [sU.validate.bind(sU), sU.handle.bind(sU)];
   }
 
