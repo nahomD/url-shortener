@@ -10,19 +10,27 @@ export class RedirectUrls {
 
   async handle(req: Request, res: Response, next: NextFunction) {
     try {
-      const uC = this.buildUseCase();
-      const redirectUrl = await uC.execute(req.params.id);
-      this.redirect(res, redirectUrl);
+      await this.tryHandle(req, res);
     } catch (error) {
       next(error);
     }
   }
 
-  private redirect(res: Response, redirectUrl: string) {
-    res.redirect(301, redirectUrl);
+  private async tryHandle(req: Request, res: Response) {
+    const uC = this.buildUseCase();
+    const redirectUrl = await this.executeUseCase(uC, req);
+    this.redirect(res, redirectUrl);
   }
 
   private buildUseCase() {
     return new RedirectUseCase(Context.urlStorage);
+  }
+
+  private async executeUseCase(uC: RedirectUseCase, req): Promise<string> {
+    return await uC.execute(req.params.id);
+  }
+
+  private redirect(res: Response, redirectUrl: string) {
+    res.redirect(301, redirectUrl);
   }
 }
