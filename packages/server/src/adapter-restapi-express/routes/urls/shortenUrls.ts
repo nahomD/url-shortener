@@ -44,31 +44,35 @@ export class ShortenUrls {
 
   private async tryHandle(req: Request, res: Response) {
     const uC = this.buildShortenUseCase();
-    const result = await uC.execute(req.body.url);
-    this.respondWithResult(res, result);
+    const response = await this.getResponse(uC, req);
+    this.sendResponse(res, response);
   }
 
   private buildShortenUseCase() {
     return new ShortenUseCase(Context.urlStorage, Context.urlIdGenerator);
   }
 
-  private respondWithResult(res: Response, result: ShortenUseCaseResponse) {
-    this.respond(res, this.calculateStatus(result), this.buildBody(result));
+  private async getResponse(uC: ShortenUseCase, req) {
+    return await uC.execute(req.body.url);
   }
 
-  private respond(res: Response, status: number, body) {
+  private sendResponse(res: Response, response: ShortenUseCaseResponse) {
+    this.send(res, this.calculateStatus(response), this.buildBody(response));
+  }
+
+  private send(res: Response, status: number, body) {
     res.status(status);
     res.json(body);
   }
 
-  private calculateStatus(result: ShortenUseCaseResponse) {
-    return result.preexisting ? 200 : 201;
+  private calculateStatus(response: ShortenUseCaseResponse) {
+    return response.preexisting ? 200 : 201;
   }
 
-  private buildBody(result: ShortenUseCaseResponse) {
+  private buildBody(response: ShortenUseCaseResponse) {
     return {
-      longUrl: result.longUrl,
-      shortUrl: this.buildShortUrl(result.shortenedId),
+      longUrl: response.longUrl,
+      shortUrl: this.buildShortUrl(response.shortenedId),
     };
   }
 
