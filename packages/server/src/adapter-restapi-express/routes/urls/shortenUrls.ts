@@ -63,7 +63,7 @@ export class ShortenUrls {
   }
 
   private buildShortUrl(shortenedId: string) {
-    return `https://${process.env.HOST}/${shortenedId}`;
+    return `https://${process.env.DOMAIN}/${shortenedId}`;
   }
 
   private isValidationError(error: unknown) {

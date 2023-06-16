@@ -14,14 +14,14 @@ import {
 } from './utilities';
 
 const longUrl = 'https://google.com';
-const host = 'sh.rt';
+const domain = 'sh.rt';
 
 function stubUrlIdGenerator(gSpy: GeneratorSpy) {
   Context.urlIdGenerator = gSpy;
 }
 
-function setHost(host: string) {
-  process.env.HOST = host;
+function setDomain(host: string) {
+  process.env.DOMAIN = host;
 }
 
 async function sendRequest(body) {
@@ -51,13 +51,13 @@ describe('POST /api/urls', () => {
     const gSpy = new GeneratorSpy();
     stubUrlIdGenerator(gSpy);
 
-    setHost(host);
+    setDomain(domain);
     const response = await sendRequest({ url: longUrl });
 
     assertStatusCode(response, 201);
     assertBody(response, {
       longUrl,
-      shortUrl: `https://${host}/${gSpy.generatedId}`,
+      shortUrl: `https://${domain}/${gSpy.generatedId}`,
     });
   });
 
@@ -77,13 +77,13 @@ describe('POST /api/urls', () => {
     const preexistingUrl = stub.preexistingUrl;
     Context.urlStorage = stub;
 
-    setHost(host);
+    setDomain(domain);
     const response = await sendRequest({ url: preexistingUrl.getLongUrl() });
 
     assertStatusCode(response, 200);
     assertBody(response, {
       longUrl: preexistingUrl.getLongUrl(),
-      shortUrl: `https://${host}/${preexistingUrl.getShortenedId()}`,
+      shortUrl: `https://${domain}/${preexistingUrl.getShortenedId()}`,
     });
   });
 
