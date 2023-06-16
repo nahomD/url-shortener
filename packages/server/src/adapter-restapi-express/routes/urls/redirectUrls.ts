@@ -17,16 +17,16 @@ export class RedirectUrls {
   }
 
   private async tryHandle(req: Request, res: Response) {
-    const uC = this.buildUseCase();
-    const redirectUrl = await this.executeUseCase(uC, req);
-    this.redirect(res, redirectUrl);
+    const uC = this.buildRedirectUseCase();
+    const rUrl = await this.getRedirectUrl(uC, req);
+    this.redirect(res, rUrl);
   }
 
-  private buildUseCase() {
+  private buildRedirectUseCase() {
     return new RedirectUseCase(Context.urlStorage);
   }
 
-  private async executeUseCase(uC: RedirectUseCase, req): Promise<string> {
+  private async getRedirectUrl(uC: RedirectUseCase, req): Promise<string> {
     return await uC.execute(req.params.id);
   }
 
