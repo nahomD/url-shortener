@@ -354,6 +354,16 @@ describe('Index', () => {
     assertCorrectLinkIsVisible();
   }, 10000);
 
+  test('clicking enter sends request', async () => {
+    renderSUT();
+
+    await typeUrlIntoInput(validUrl);
+    await userEvent.keyboard('{enter}');
+
+    assertShortenUrlRequestTimes(1);
+    expect(mockShortenUrl).toBeCalledWith(validUrl);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });

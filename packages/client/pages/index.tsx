@@ -1,5 +1,5 @@
 import { ShortenedUrl, shortenUrl } from '@/utilities/httpClient';
-import { useState } from 'react';
+import { KeyboardEvent, useState } from 'react';
 import isUrlHttp from 'is-url-http';
 import dynamic from 'next/dynamic';
 
@@ -40,6 +40,9 @@ export default function Index() {
             className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none text-cyan-500"
             value={link}
             autoFocus
+            onKeyDown={async (event) => {
+              if (IsEnterKey(event)) await submit();
+            }}
           />
           <Button
             rippleColor="light"
@@ -48,14 +51,7 @@ export default function Index() {
               'cursor-not-allowed bg-cyan-500/60 hover:bg-cyan-500/60 hover:shadow-cyan-500/40'
             } w-28 h-12 px-6 py-2 text-white text-lg transition duration-150 ease-in-out rounded-lg bg-cyan-500 shadow-md shadow-cyan-500/40 hover:shadow-cyan-500/80 hover:bg-cyan-600`}
             onClick={async () => {
-              if (isUrlHttp(link)) {
-                setIsLoading(true);
-                setShortenedUrl(await shortenUrl(link));
-                setIsLoading(false);
-                setLink('');
-                setError('');
-              } else if (link === '') setError('Link is required');
-              else setError('Invalid Link');
+              await submit();
             }}
             disabled={isLoading}
             data-testid="shorten-button"
@@ -105,8 +101,25 @@ export default function Index() {
     </div>
   );
 
+  function IsEnterKey(event: KeyboardEvent<HTMLInputElement>) {
+    return event.key === 'Enter';
+  }
+
   function removeProtocol(url: string): string {
     const u = new URL(url);
     return u.hostname + u.pathname;
+  }
+  async function submit() {
+    if (isUrlHttp(link)) await sendRequest();
+    else if (link === '') setError('Link is required');
+    else setError('Invalid Link');
+  }
+
+  async function sendRequest() {
+    setIsLoading(true);
+    setShortenedUrl(await shortenUrl(link));
+    setIsLoading(false);
+    setLink('');
+    setError('');
   }
 }
