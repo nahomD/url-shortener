@@ -83,7 +83,7 @@ export default function Index() {
             >
               <p className="grow">{removeProtocol(shortenedUrl.longUrl)}</p>
               <a
-                className="text-cyan-500"
+                className="text-cyan-500 hover:text-cyan-600"
                 href={shortenedUrl.shortUrl}
                 target="_blank"
               >
