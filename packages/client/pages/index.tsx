@@ -82,9 +82,13 @@ export default function Index() {
               className="flex flex-row justify-between items-center gap-x-2 text-lg"
             >
               <p className="grow">{removeProtocol(shortenedUrl.longUrl)}</p>
-              <p className="text-cyan-500">
+              <a
+                className="text-cyan-500"
+                href={shortenedUrl.shortUrl}
+                target="_blank"
+              >
                 {removeProtocol(shortenedUrl.shortUrl)}
-              </p>
+              </a>
               <Button
                 onClick={() =>
                   navigator.clipboard.writeText(shortenedUrl.shortUrl)

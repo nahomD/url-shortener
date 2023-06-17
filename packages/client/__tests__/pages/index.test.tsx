@@ -141,6 +141,12 @@ async function assertWhileLoadingAndAfterLoading(
   });
 }
 
+function assertCorrectLinkIsVisible() {
+  const link = queryElementByRole('link');
+  expect(link).toHaveAttribute('href', response.shortUrl);
+  expect(link).toHaveAttribute('target', '_blank');
+}
+
 describe('Index', () => {
   test('heading is displayed', () => {
     renderSUT();
@@ -300,7 +306,7 @@ describe('Index', () => {
     await clickCopyButton();
 
     await assertClipBoardContainsShortUrl();
-  });
+  }, 10000);
 
   test('shorten button is disabled while loading and enabled after loading response', async () => {
     setResponseWithDelay();
@@ -337,6 +343,15 @@ describe('Index', () => {
     function assertTextIsVisible() {
       expect(queryShortenButtonByText()).toBeVisible();
     }
+  }, 10000);
+
+  test('clicking shortened url opens the url in a new tab', async () => {
+    setRequestResponse();
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    assertCorrectLinkIsVisible();
   }, 10000);
 
   afterEach(() => {
