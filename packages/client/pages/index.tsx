@@ -6,10 +6,13 @@ import dynamic from 'next/dynamic';
 const Button = dynamic(() => import('@/components/button'), { ssr: false });
 
 export default function Index() {
+  const COPY = 'Copy';
+
   const [link, setLink] = useState('');
   const [shortenedUrl, setShortenedUrl] = useState<ShortenedUrl>();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [copyButtonText, setCopyButtonText] = useState(COPY);
 
   return (
     <div className="flex flex-col items-center h-screen gap-y-14 justify-center">
@@ -86,13 +89,11 @@ export default function Index() {
                 {removeProtocol(shortenedUrl.shortUrl)}
               </a>
               <Button
-                onClick={() =>
-                  navigator.clipboard.writeText(shortenedUrl.shortUrl)
-                }
+                onClick={onCopyButtonClick}
                 className="text-cyan-500 px-4 py-2 hover:bg-slate-100 rounded-md hover:transition-all"
                 rippleColor="light"
               >
-                Copy
+                {copyButtonText}
               </Button>
             </div>
           </div>
@@ -121,5 +122,19 @@ export default function Index() {
     setIsLoading(false);
     setLink('');
     setError('');
+  }
+
+  function onCopyButtonClick() {
+    copyShortUrlToClipBoard();
+    setCopyButtonText('Copied');
+    setCopyButtonTextAfter5Secs();
+
+    function copyShortUrlToClipBoard() {
+      navigator.clipboard.writeText(shortenedUrl?.shortUrl ?? '');
+    }
+
+    function setCopyButtonTextAfter5Secs() {
+      setTimeout(() => setCopyButtonText(COPY), 5000);
+    }
   }
 }

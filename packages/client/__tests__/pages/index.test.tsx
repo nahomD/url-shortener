@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '../testUtils';
+import { act, render, screen, waitFor } from '../testUtils';
 import userEvent from '@testing-library/user-event';
 import Index from 'pages';
 
@@ -13,6 +13,8 @@ const shortenButtonText = /^shorten/i;
 const validUrl = 'https://google.com/test/path/1';
 const invalidUrl = 'invalid url';
 const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
+const copiedText = /^copied/i;
+const copyText = /^copy/i;
 
 function setRequestResponse() {
   mockShortenUrl.mockResolvedValue(response);
@@ -75,7 +77,7 @@ function getUrlInput(): HTMLElement {
 
 async function clickCopyButton() {
   userEvent.setup();
-  await userEvent.click(screen.getByText(/^copy/i));
+  await userEvent.click(screen.getByText(copyText));
 }
 
 function removeProtocol(url: string) {
@@ -112,7 +114,7 @@ function assertListItemContainsUrlWithoutProtocol(url: string) {
 }
 
 function assertCopyButtonIsInsideAListItem() {
-  const copyButton = queryElementByText(/^copy/i);
+  const copyButton = queryElementByText(copyText);
   expect(queryElementByRole('listitem')).toContainElement(copyButton);
   expect(copyButton).toBeVisible();
 }
@@ -145,6 +147,20 @@ function assertCorrectLinkIsVisible() {
   const link = queryElementByRole('link');
   expect(link).toHaveAttribute('href', response.shortUrl);
   expect(link).toHaveAttribute('target', '_blank');
+}
+
+async function assertClickingCopyButtonChangesText() {
+  expect(queryElementByText(copiedText)).toBeNull();
+  await clickCopyButton();
+  expect(queryElementByText(copiedText)).not.toBeNull();
+}
+
+async function assertCopiedChangesToCopyAfter5secs() {
+  expect(queryElementByText(copiedText)).not.toBeNull();
+  expect(queryElementByText(copyText)).toBeNull();
+  await act(() => new Promise((resolve) => setTimeout(resolve, 5000)));
+  expect(queryElementByText(copiedText)).toBeNull();
+  expect(queryElementByText(copyText)).not.toBeNull();
 }
 
 describe('Index', () => {
@@ -363,6 +379,25 @@ describe('Index', () => {
     assertShortenUrlRequestTimes(1);
     expect(mockShortenUrl).toBeCalledWith(validUrl);
   });
+
+  test('clicking copy button makes it change its text to "Copied"', async () => {
+    setRequestResponse();
+    renderSUT();
+
+    await typeValidUrlAndClickShorten();
+
+    await assertClickingCopyButtonChangesText();
+  }, 10000);
+
+  test('"Copied" button changes to "Copy" after 5 secs', async () => {
+    setRequestResponse();
+    renderSUT();
+    await typeValidUrlAndClickShorten();
+
+    await clickCopyButton();
+
+    await assertCopiedChangesToCopyAfter5secs();
+  }, 15000);
 
   afterEach(() => {
     jest.clearAllMocks();
