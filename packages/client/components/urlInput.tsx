@@ -1,4 +1,4 @@
-import { KeyboardEvent } from 'react';
+import { KeyboardEvent, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 
 const Button = dynamic(() => import('@/components/button'), { ssr: false });
@@ -16,6 +16,12 @@ export function UrlInput({
   isLoading: boolean;
   link: string;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <div>
       <div
@@ -39,11 +45,11 @@ export function UrlInput({
           placeholder="Enter link"
           onChange={(e) => onLinkChange(e.target.value)}
           className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none text-cyan-500"
-          autoFocus
           onKeyDown={(event) => {
             if (IsEnterKey(event)) onSubmit();
           }}
           value={link}
+          ref={inputRef}
         />
         <Button
           rippleColor="light"
