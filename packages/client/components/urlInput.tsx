@@ -1,19 +1,21 @@
-import isUrlHttp from 'is-url-http';
-import { KeyboardEvent, useState } from 'react';
-import { ShortenedUrl, shortenUrl } from '@/utilities/httpClient';
+import { KeyboardEvent } from 'react';
 import dynamic from 'next/dynamic';
 
 const Button = dynamic(() => import('@/components/button'), { ssr: false });
 
 export function UrlInput({
-  onShortenedUrl,
+  onLinkChange,
+  onSubmit,
+  error,
+  isLoading,
+  link,
 }: {
-  onShortenedUrl: (shortenedUrl: ShortenedUrl) => void;
+  onLinkChange: (link: string) => void;
+  onSubmit: () => void;
+  error: string;
+  isLoading: boolean;
+  link: string;
 }) {
-  const [link, setLink] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
   return (
     <div>
       <div
@@ -35,13 +37,13 @@ export function UrlInput({
           name="url"
           id="url"
           placeholder="Enter link"
-          onChange={(e) => setLink(e.target.value)}
+          onChange={(e) => onLinkChange(e.target.value)}
           className="w-96 bg-transparent border-none h-12 text-lg focus:outline-none text-cyan-500"
-          value={link}
           autoFocus
-          onKeyDown={async (event) => {
-            if (IsEnterKey(event)) await submit();
+          onKeyDown={(event) => {
+            if (IsEnterKey(event)) onSubmit();
           }}
+          value={link}
         />
         <Button
           rippleColor="light"
@@ -49,9 +51,7 @@ export function UrlInput({
             isLoading &&
             'cursor-not-allowed bg-cyan-500/60 hover:bg-cyan-500/60 hover:shadow-cyan-500/40'
           } w-28 h-12 px-6 py-2 text-white text-lg transition duration-150 ease-in-out rounded-lg bg-cyan-500 shadow-md shadow-cyan-500/40 hover:shadow-cyan-500/80 hover:bg-cyan-600`}
-          onClick={async () => {
-            await submit();
-          }}
+          onClick={onSubmit}
           disabled={isLoading}
           data-testid="shorten-button"
         >
@@ -72,21 +72,8 @@ export function UrlInput({
       {error && <p className="text-red-600 text-sm pt-2">{error}</p>}
     </div>
   );
+
   function IsEnterKey(event: KeyboardEvent<HTMLInputElement>) {
     return event.key === 'Enter';
-  }
-
-  async function submit() {
-    if (isUrlHttp(link)) await sendRequest();
-    else if (link === '') setError('Link is required');
-    else setError('Invalid Link');
-  }
-
-  async function sendRequest() {
-    setIsLoading(true);
-    onShortenedUrl(await shortenUrl(link));
-    setIsLoading(false);
-    setLink('');
-    setError('');
   }
 }

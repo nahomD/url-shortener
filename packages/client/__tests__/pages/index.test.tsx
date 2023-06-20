@@ -1,5 +1,10 @@
-import { act, render, screen, waitFor } from '../testUtils';
+import { render, screen, waitFor } from '../wrapper';
 import userEvent from '@testing-library/user-event';
+import {
+  getUrlInput,
+  queryElementByRole,
+  queryElementByText,
+} from '__tests__/utilityFunctions';
 import Index from 'pages';
 
 const mockShortenUrl = jest.fn();
@@ -13,17 +18,10 @@ const shortenButtonText = /^shorten/i;
 const validUrl = 'https://google.com/test/path/1';
 const invalidUrl = 'invalid url';
 const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
-const copiedText = /^copied/i;
 const copyText = /^copy/i;
 
 function setRequestResponse() {
   mockShortenUrl.mockResolvedValue(response);
-}
-
-function setResponseWithDelay() {
-  mockShortenUrl.mockImplementation(() => {
-    return new Promise((resolve) => setTimeout(() => resolve(response), 250));
-  });
 }
 
 function renderSUT() {
@@ -32,18 +30,6 @@ function renderSUT() {
 
 function getList(): HTMLElement | null {
   return queryElementByRole('list');
-}
-
-function queryElementByRole(role: string) {
-  return screen.queryByRole(role);
-}
-
-function queryShortenButtonByText(): HTMLElement | null {
-  return queryElementByText(shortenButtonText);
-}
-
-function queryElementByText(text: string | RegExp): HTMLElement | null {
-  return screen.queryByText(text);
 }
 
 async function typeValidUrlAndClickShorten() {
@@ -69,10 +55,6 @@ async function typeUrlIntoInput(validUrl: string) {
 
 async function clearUrlInput() {
   await userEvent.clear(getUrlInput());
-}
-
-function getUrlInput(): HTMLElement {
-  return screen.getByRole('textbox');
 }
 
 async function clickCopyButton() {
@@ -128,64 +110,11 @@ async function assertClipBoardContainsShortUrl() {
   expect(clipText).toBe(response.shortUrl);
 }
 
-async function assertWhileLoadingAndAfterLoading(
-  assertWhileLoading: () => void,
-  assertAfterLoading: () => void
-) {
-  const url = removeProtocol(response.shortUrl);
-  await waitFor(() => {
-    expect(queryElementByText(url)).not.toBeInTheDocument();
-    assertWhileLoading();
-  });
-  await waitFor(() => {
-    expect(queryElementByText(url)).toBeInTheDocument();
-    assertAfterLoading();
-  });
-}
-
-function assertCorrectLinkIsVisible() {
-  const link = queryElementByRole('link');
-  expect(link).toHaveAttribute('href', response.shortUrl);
-  expect(link).toHaveAttribute('target', '_blank');
-}
-
-async function assertClickingCopyButtonChangesText() {
-  expect(queryElementByText(copiedText)).toBeNull();
-  await clickCopyButton();
-  expect(queryElementByText(copiedText)).not.toBeNull();
-}
-
-async function assertCopiedChangesToCopyAfter5secs() {
-  expect(queryElementByText(copiedText)).not.toBeNull();
-  expect(queryElementByText(copyText)).toBeNull();
-  await act(() => new Promise((resolve) => setTimeout(resolve, 5000)));
-  expect(queryElementByText(copiedText)).toBeNull();
-  expect(queryElementByText(copyText)).not.toBeNull();
-}
-
 describe('Index', () => {
   test('heading is displayed', () => {
     renderSUT();
 
     assertHeadingWithText('Create Short Links');
-  });
-
-  test('url input is empty by default', () => {
-    renderSUT();
-
-    expect(getUrlInput()).not.toHaveValue();
-  });
-
-  test('url input has proper placeholder text', () => {
-    renderSUT();
-
-    expect(getUrlInput()).toHaveAttribute('placeholder', 'Enter link');
-  });
-
-  test('shorten button has proper text', () => {
-    renderSUT();
-
-    expect(queryElementByRole('button')).toHaveTextContent(shortenButtonText);
   });
 
   test('valid url triggers a request', async () => {
@@ -246,12 +175,6 @@ describe('Index', () => {
     await typeInvalidUrlAndClickShorten();
 
     assertShortenUrlRequestWasNotSent();
-  });
-
-  test('URL input starts focused', () => {
-    renderSUT();
-
-    expect(getUrlInput()).toHaveFocus();
   });
 
   test('displays a list after a successful request', async () => {
@@ -324,52 +247,6 @@ describe('Index', () => {
     await assertClipBoardContainsShortUrl();
   }, 10000);
 
-  test('shorten button is disabled while loading and enabled after loading response', async () => {
-    setResponseWithDelay();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
-    await assertWhileLoadingAndAfterLoading(
-      assertButtonIsDisabled,
-      assertButtonIsEnabled
-    );
-    function assertButtonIsDisabled() {
-      expect(screen.queryByTestId('shorten-button')).toBeDisabled();
-    }
-    function assertButtonIsEnabled() {
-      expect(queryShortenButtonByText()).toBeEnabled();
-    }
-  }, 10000);
-
-  test('shorten button text is removed while loading response and restored after loading response', async () => {
-    setResponseWithDelay();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
-    await assertWhileLoadingAndAfterLoading(
-      assertTextIsRemoved,
-      assertTextIsVisible
-    );
-    function assertTextIsRemoved() {
-      expect(queryShortenButtonByText()).not.toBeInTheDocument();
-    }
-
-    function assertTextIsVisible() {
-      expect(queryShortenButtonByText()).toBeVisible();
-    }
-  }, 10000);
-
-  test('clicking shortened url opens the url in a new tab', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
-    assertCorrectLinkIsVisible();
-  }, 10000);
-
   test('clicking enter sends request', async () => {
     renderSUT();
 
@@ -379,25 +256,6 @@ describe('Index', () => {
     assertShortenUrlRequestTimes(1);
     expect(mockShortenUrl).toBeCalledWith(validUrl);
   });
-
-  test('clicking copy button makes it change its text to "Copied"', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
-    await assertClickingCopyButtonChangesText();
-  }, 10000);
-
-  test('"Copied" button changes to "Copy" after 5 secs', async () => {
-    setRequestResponse();
-    renderSUT();
-    await typeValidUrlAndClickShorten();
-
-    await clickCopyButton();
-
-    await assertCopiedChangesToCopyAfter5secs();
-  }, 15000);
 
   afterEach(() => {
     jest.clearAllMocks();
