@@ -2,12 +2,12 @@ import userEvent from '@testing-library/user-event';
 import { ShortenedUrlRow } from '@/components/shortenedUrlRow';
 import { act, render, screen } from '../wrapper';
 import {
+  copyText,
   queryElementByRole,
   queryElementByText,
-} from '__tests__/utilityFunctions';
+} from '__tests__/testUtils';
 
 const copiedText = /^copied/i;
-const copyText = /^copy/i;
 const url = {
   longUrl: 'https://google.com',
   shortUrl: 'https://sh.rt/g',

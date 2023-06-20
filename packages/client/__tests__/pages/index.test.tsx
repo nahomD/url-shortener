@@ -1,10 +1,11 @@
 import { render, screen, waitFor } from '../wrapper';
 import userEvent from '@testing-library/user-event';
 import {
+  copyText,
   getUrlInput,
   queryElementByRole,
   queryElementByText,
-} from '__tests__/utilityFunctions';
+} from '__tests__/testUtils';
 import Index from 'pages';
 
 const mockShortenUrl = jest.fn();
@@ -18,7 +19,6 @@ const shortenButtonText = /^shorten/i;
 const validUrl = 'https://google.com/test/path/1';
 const invalidUrl = 'invalid url';
 const response = { longUrl: validUrl, shortUrl: 'https://sh.rt/go' };
-const copyText = /^copy/i;
 
 function setRequestResponse() {
   mockShortenUrl.mockResolvedValue(response);

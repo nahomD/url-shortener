@@ -11,3 +11,5 @@ export function queryElementByText(text: string | RegExp): HTMLElement | null {
 export function getUrlInput(): HTMLElement {
   return screen.getByRole('textbox');
 }
+
+export const copyText = /^copy/i;

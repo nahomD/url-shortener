@@ -5,7 +5,7 @@ import {
   getUrlInput,
   queryElementByRole,
   queryElementByText,
-} from '__tests__/utilityFunctions';
+} from '__tests__/testUtils';
 
 const shortenButtonText = /^shorten/i;
 
