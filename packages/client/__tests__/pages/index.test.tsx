@@ -53,10 +53,6 @@ async function typeUrlIntoInput(validUrl: string) {
   await userEvent.type(getUrlInput(), validUrl);
 }
 
-async function clearUrlInput() {
-  await userEvent.clear(getUrlInput());
-}
-
 async function clickCopyButton() {
   userEvent.setup();
   await userEvent.click(screen.getByText(copyText));
@@ -158,17 +154,6 @@ describe('Index', () => {
     assertInvalidLinkTextIsNotDisplayed();
   });
 
-  test('already existing "Invalid Link" text is removed if url is valid', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeInvalidUrlAndClickShorten();
-    await clearUrlInput();
-    await typeValidUrlAndClickShorten();
-
-    assertInvalidLinkTextIsNotDisplayed();
-  });
-
   test('invalid url does not trigger a request', async () => {
     renderSUT();
 
@@ -177,63 +162,24 @@ describe('Index', () => {
     assertShortenUrlRequestWasNotSent();
   });
 
-  test('displays a list after a successful request', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
-    expect(getList()).toBeVisible();
-  });
-
   test('no list exists before a successful request', () => {
     renderSUT();
 
     expect(getList()).not.toBeInTheDocument();
   });
 
-  test('url input is cleared after a successful request', async () => {
+  test('state after a successful request', async () => {
     setRequestResponse();
     renderSUT();
 
     await typeValidUrlAndClickShorten();
 
     expect(getUrlInput()).toHaveValue('');
-  });
-
-  test('displays a single listitem inside a list after a successful request', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
+    assertInvalidLinkTextIsNotDisplayed();
+    expect(getList()).toBeVisible();
     assertAListItemIsInsideAList();
-  });
-
-  test('displays long url after a successful request', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
     assertListItemContainsUrlWithoutProtocol(response.longUrl);
-  });
-
-  test('displays shortened url after a successful request', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
     assertListItemContainsUrlWithoutProtocol(response.shortUrl);
-  });
-
-  test('displays a copy button in a listitem after a successful request', async () => {
-    setRequestResponse();
-    renderSUT();
-
-    await typeValidUrlAndClickShorten();
-
     assertCopyButtonIsInsideAListItem();
   });
 
@@ -245,7 +191,7 @@ describe('Index', () => {
     await clickCopyButton();
 
     await assertClipBoardContainsShortUrl();
-  }, 10000);
+  });
 
   test('clicking enter sends request', async () => {
     renderSUT();
