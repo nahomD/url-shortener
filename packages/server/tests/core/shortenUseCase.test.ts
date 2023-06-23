@@ -7,6 +7,7 @@ import { UrlStorage } from '../../src/core/urlStorage';
 import { GeneratorSpy } from './generatorSpy';
 import { assertValidationErrorWithMessage } from './utilities';
 import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
+import DailyClickCountStat from '../../src/core/dailyClickCountStat';
 
 const url = new Url('https://yahoo.com', 'fe23fe');
 const URL_REQUIRED = 'URL is required';
@@ -111,6 +112,13 @@ test('returns correct response for a preexisting url', async () => {
 class StorageSpy implements UrlStorage {
   saveWasCalled = false;
   preexistingUrl = url;
+
+  saveClick(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  getTotalClicksByDay(): Promise<DailyClickCountStat> {
+    throw new Error('Method not implemented.');
+  }
 
   findById(): Promise<Url | null> {
     throw new Error('Method not implemented.');

@@ -12,6 +12,7 @@ import {
   assertBody,
   assertStatusCode,
 } from './utilities';
+import DailyClickCountStat from '../../src/core/dailyClickCountStat';
 
 const longUrl = 'https://google.com';
 const domain = 'sh.rt';
@@ -96,6 +97,13 @@ describe('POST /api/urls', () => {
 
 class PreexistingStorageStub implements UrlStorage {
   preexistingUrl = new Url(longUrl, 'f1234');
+
+  saveClick(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  getTotalClicksByDay(): Promise<DailyClickCountStat> {
+    throw new Error('Method not implemented.');
+  }
 
   findById(): Promise<Url | null> {
     throw new Error('Method not implemented.');

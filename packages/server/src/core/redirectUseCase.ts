@@ -3,6 +3,7 @@ import { Url } from './url';
 import { UrlStorage } from './urlStorage';
 import { ValidationError } from './validationError';
 import { ValidationMessages } from './validationMessages';
+import { Click } from './click';
 
 export class RedirectUseCase {
   constructor(private storage: UrlStorage) {}
@@ -12,6 +13,7 @@ export class RedirectUseCase {
     const url = await this.findUrlById(uId);
     if (this.isNotFound(url))
       throw this.buildValidationError(ValidationMessages.ID_DOES_NOT_EXIST);
+    await this.storage.saveClick(new Click(uId, new Date()));
     return url.getLongUrl();
   }
 

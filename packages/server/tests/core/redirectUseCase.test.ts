@@ -3,15 +3,30 @@ import { Url } from '../../src/core/url';
 import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
 import { assertValidationErrorWithMessage } from './utilities';
 import { UrlStorage } from '../../src/core/urlStorage';
+import DailyClickCountStat, {
+  DailyClickCount,
+} from '../../src/core/dailyClickCountStat';
+import { UrlId } from '../../src/core/urlId';
 
 const ID_INVALID = 'Id is invalid';
 const ID_REQUIRED = 'Id is required';
+const url = new Url('https://google.com', 'googleId1');
 
 let storageStub: UrlStorage;
 
 function createUseCase() {
   storageStub = new FakeUrlStorage();
   return new RedirectUseCase(storageStub);
+}
+
+async function assertCorrectClickCountStat() {
+  const date = new Date();
+  const dateString = `${date.getDate()}/${
+    date.getMonth() + 1
+  }/${date.getFullYear()}`;
+  expect(
+    await storageStub.getTotalClicksByDay(new UrlId(url.getShortenedId()))
+  ).toEqual(new DailyClickCountStat(1, [new DailyClickCount(dateString, 1)]));
 }
 
 test('throws if id is empty', async () => {
@@ -81,10 +96,18 @@ test('throws if id contains "-"', async () => {
 
 test('returns redirect url', async () => {
   const rUC = createUseCase();
-  const url = new Url('https://google.com', 'googleId1');
   storageStub.save(url);
 
   const longUrl = await rUC.execute(url.getShortenedId());
 
   expect(longUrl).toBe(url.getLongUrl());
+});
+
+test('registers click', async () => {
+  const rUC = createUseCase();
+  storageStub.save(url);
+
+  await rUC.execute(url.getShortenedId());
+
+  await assertCorrectClickCountStat();
 });
