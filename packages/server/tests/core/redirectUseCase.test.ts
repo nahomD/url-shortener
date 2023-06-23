@@ -1,7 +1,7 @@
 import { RedirectUseCase } from '../../src/core/redirectUseCase';
 import { Url } from '../../src/core/url';
 import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
-import { assertValidationErrorWithMessage } from './utilities';
+import { assertValidationErrorWithMessage, getTodayString } from './utilities';
 import { UrlStorage } from '../../src/core/urlStorage';
 import DailyClickCountStat, {
   DailyClickCount,
@@ -20,10 +20,7 @@ function createUseCase() {
 }
 
 async function assertCorrectClickCountStat() {
-  const date = new Date();
-  const dateString = `${date.getDate()}/${
-    date.getMonth() + 1
-  }/${date.getFullYear()}`;
+  const dateString = getTodayString();
   expect(
     await storageStub.getTotalClicksByDay(new UrlId(url.getShortenedId()))
   ).toEqual(new DailyClickCountStat(1, [new DailyClickCount(dateString, 1)]));
