@@ -12,6 +12,7 @@ import Context from '../../src/adapter-restapi-express/context';
 import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
 import { Click } from '../../src/core/click';
 import { UrlId } from '../../src/core/urlId';
+import { Url } from '../../src/core/url';
 
 const validId = 'googleId1';
 
@@ -46,6 +47,7 @@ describe('GET api/urls/<id>/total-clicks-by-day', () => {
 
   test('returns 200 for a valid id', async () => {
     const clickDate = new Date();
+    Context.urlStorage.save(new Url('https://google.com', validId));
     Context.urlStorage.saveClick(new Click(new UrlId(validId), clickDate));
 
     const response = await sendRequest(validId);
