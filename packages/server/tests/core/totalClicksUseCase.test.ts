@@ -1,20 +1,62 @@
 import { FakeUrlStorage } from '../../src/adapter-persistence-fake/fakeUrlStorage';
 import { Click } from '../../src/core/click';
-import {
-  TotalClicksUseCase,
-  TotalClicksUseCaseResponse,
-} from '../../src/core/totalClicksUseCase';
+import { TotalClicksUseCase } from '../../src/core/totalClicksUseCase';
+import { Url } from '../../src/core/url';
 import { UrlId } from '../../src/core/urlId';
-import {
-  assertValidationErrorWithMessage,
-  getDateString,
-  getTodayString,
-} from './utilities';
+import { assertValidationErrorWithMessage, getDateString } from './utilities';
 
 let storage;
+const validId1 = 'googleId1';
+const validId2 = 'googleId2';
+const clickDate1 = new Date();
+const clickDate2 = new Date(1999, 1, 1);
 
-function createUseCase() {
+const ID_REQUIRED = 'Id is required';
+const ID_INVALID = 'Id is invalid';
+const ID_DOES_NOT_EXIST = 'Id does not exist';
+
+function saveUrlAndClickItOnce() {
+  saveUrl(validId1);
+  saveClick(validId1, clickDate1);
+}
+
+function saveUrlAndClickItTwice() {
+  saveUrl(validId1);
+  saveClick(validId1, clickDate2);
+  saveClick(validId1, clickDate1);
+}
+
+function saveTwoUrlsAndClickBothOnce() {
+  saveUrl(validId1);
+  saveClick(validId1, clickDate1);
+  saveUrl(validId2, 'https://google2.com');
+  saveClick(validId2, clickDate2);
+}
+
+function saveUrl(id: string, longUrl?: string) {
+  storage.save(new Url(longUrl ?? 'https://google1.com', id));
+}
+
+function saveClick(id: string, clickDate: Date) {
+  storage.saveClick(new Click(new UrlId(id), clickDate));
+}
+
+function createTotalClicksUseCase() {
   return new TotalClicksUseCase(storage);
+}
+
+function getTotalClicksByDay(uC: TotalClicksUseCase, id: string) {
+  return uC.getTotalClicksPerDay(id);
+}
+
+function buildExpectedUseCaseResponse(
+  totalClicks: number,
+  dailyClickCounts: { day: string; totalClicks: number }[]
+) {
+  return {
+    totalClicks: totalClicks,
+    dailyClickCounts: dailyClickCounts,
+  };
 }
 
 function assertObjectEquality(obj1, obj2) {
@@ -25,86 +67,91 @@ beforeEach(() => {
   storage = new FakeUrlStorage();
 });
 
-test('throw if id is empty', async () => {
-  const tCU = createUseCase();
+test('throws if id is empty', async () => {
+  const uC = createTotalClicksUseCase();
 
   await assertValidationErrorWithMessage(
-    () => tCU.getTotalClicksPerDay(''),
-    'Id is required'
+    () => getTotalClicksByDay(uC, ''),
+    ID_REQUIRED
   );
 });
 
 test.each(['invalid id', '-_3456789'])(
-  'throw if id is invalid',
+  'throws if id is invalid',
   async (invalidId) => {
-    const tCU = createUseCase();
+    const uC = createTotalClicksUseCase();
 
     await assertValidationErrorWithMessage(
-      () => tCU.getTotalClicksPerDay(invalidId),
-      'Id is invalid'
+      () => getTotalClicksByDay(uC, invalidId),
+      ID_INVALID
     );
   }
 );
 
 test('returns correct response for zero clicks', async () => {
-  const tCU = createUseCase();
+  saveUrl(validId1);
+  const uC = createTotalClicksUseCase();
 
-  const response = await tCU.getTotalClicksPerDay('googleId1');
+  const response = await getTotalClicksByDay(uC, validId1);
 
-  expect(response).toEqual({
-    totalClicks: 0,
-    dailyClickCounts: [],
-  });
+  expect(response).toEqual(buildExpectedUseCaseResponse(0, []));
 });
 
 test('returns correct response for one click', async () => {
-  const id = 'googleId1';
-  storage.saveClick(new Click(new UrlId(id), new Date()));
-  const tCU = createUseCase();
+  saveUrlAndClickItOnce();
+  const uC = createTotalClicksUseCase();
 
-  const response = await tCU.getTotalClicksPerDay(id);
+  const response = await getTotalClicksByDay(uC, validId1);
 
-  assertObjectEquality(response, {
-    totalClicks: 1,
-    dailyClickCounts: [{ day: getTodayString(), totalClicks: 1 }],
-  });
+  assertObjectEquality(
+    response,
+    buildExpectedUseCaseResponse(1, [
+      { day: getDateString(clickDate1), totalClicks: 1 },
+    ])
+  );
 });
 
 test('returns correct response for two clicks of the same id', async () => {
-  const id = 'googleId1';
-  const d = new Date(1999, 1, 1);
-  storage.saveClick(new Click(new UrlId(id), d));
-  storage.saveClick(new Click(new UrlId(id), new Date()));
-  const tCU = createUseCase();
+  saveUrlAndClickItTwice();
+  const uC = createTotalClicksUseCase();
 
-  const response = await tCU.getTotalClicksPerDay(id);
+  const response = await getTotalClicksByDay(uC, validId1);
 
-  assertObjectEquality(response, {
-    totalClicks: 2,
-    dailyClickCounts: [
-      { day: getDateString(d), totalClicks: 1 },
-      { day: getTodayString(), totalClicks: 1 },
-    ],
-  });
+  assertObjectEquality(
+    response,
+    buildExpectedUseCaseResponse(2, [
+      { day: getDateString(clickDate2), totalClicks: 1 },
+      { day: getDateString(clickDate1), totalClicks: 1 },
+    ])
+  );
 });
 
 test('returns correct response for two clicks of different id', async () => {
-  const id1 = 'googleId1';
-  const id2 = 'googleId2';
-  const d = new Date(1999, 1, 1);
-  storage.saveClick(new Click(new UrlId(id1), new Date()));
-  storage.saveClick(new Click(new UrlId(id2), d));
-  const tCU = createUseCase();
+  saveTwoUrlsAndClickBothOnce();
+  const uC = createTotalClicksUseCase();
 
-  const response1 = await tCU.getTotalClicksPerDay(id1);
-  const response2 = await tCU.getTotalClicksPerDay(id2);
+  const response1 = await getTotalClicksByDay(uC, validId1);
+  const response2 = await getTotalClicksByDay(uC, validId2);
 
-  assertObjectEquality(response1, {
-    totalClicks: 1,
-    dailyClickCounts: [{ day: getTodayString(), totalClicks: 1 }],
-  });
-  assertObjectEquality(response2, {
-    totalClicks: 1,
-    dailyClickCounts: [{ day: getDateString(d), totalClicks: 1 }],
-  });
+  assertObjectEquality(
+    response1,
+    buildExpectedUseCaseResponse(1, [
+      { day: getDateString(clickDate1), totalClicks: 1 },
+    ])
+  );
+  assertObjectEquality(
+    response2,
+    buildExpectedUseCaseResponse(1, [
+      { day: getDateString(clickDate2), totalClicks: 1 },
+    ])
+  );
+});
+
+test('throws validation error if url was not saved', async () => {
+  const uC = createTotalClicksUseCase();
+
+  await assertValidationErrorWithMessage(
+    () => uC.getTotalClicksPerDay('googleId1'),
+    ID_DOES_NOT_EXIST
+  );
 });
