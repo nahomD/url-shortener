@@ -45,7 +45,7 @@ describe('GET api/urls/<id>/total-clicks-by-day', () => {
     });
   });
 
-  test('returns 200 for a valid id', async () => {
+  test('returns 200 for a saved valid id', async () => {
     const clickDate = new Date();
     Context.urlStorage.save(new Url('https://google.com', validId));
     Context.urlStorage.saveClick(new Click(new UrlId(validId), clickDate));
@@ -64,5 +64,11 @@ describe('GET api/urls/<id>/total-clicks-by-day', () => {
         },
       ],
     });
+  });
+
+  test('returns 400 for an unsaved valid id', async () => {
+    const response = await sendRequest(validId);
+
+    assertBadRequestWithMessage(response, ValidationMessages.ID_DOES_NOT_EXIST);
   });
 });
