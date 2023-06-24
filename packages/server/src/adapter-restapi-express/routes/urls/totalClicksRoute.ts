@@ -30,7 +30,7 @@ export class TotalClicksRoute {
   }
 
   private async getResponse(uC: TotalClicksUseCase, req) {
-    return await uC.getTotalClicksPerDay(req.params.id);
+    return await uC.getTotalClicksByDay(req.params.id);
   }
 
   private sendResponse(res: Response, response: TotalClicksUseCaseResponse) {

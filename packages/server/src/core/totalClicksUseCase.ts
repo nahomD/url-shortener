@@ -7,7 +7,7 @@ import { ValidationMessages } from './validationMessages';
 export class TotalClicksUseCase {
   constructor(private urlStorage: UrlStorage) {}
 
-  async getTotalClicksPerDay(id: string): Promise<TotalClicksUseCaseResponse> {
+  async getTotalClicksByDay(id: string): Promise<TotalClicksUseCaseResponse> {
     const uId = this.buildUrlId(id);
     await this.checkIfUrlWasSaved(uId);
     const stat = await this.getDailyClickCountStat(uId);

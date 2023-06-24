@@ -46,7 +46,7 @@ function createTotalClicksUseCase() {
 }
 
 function getTotalClicksByDay(uC: TotalClicksUseCase, id: string) {
-  return uC.getTotalClicksPerDay(id);
+  return uC.getTotalClicksByDay(id);
 }
 
 function buildExpectedUseCaseResponse(
@@ -151,7 +151,7 @@ test('throws validation error if url was not saved', async () => {
   const uC = createTotalClicksUseCase();
 
   await assertValidationErrorWithMessage(
-    () => uC.getTotalClicksPerDay('googleId1'),
+    () => getTotalClicksByDay(uC, 'googleId1'),
     ID_DOES_NOT_EXIST
   );
 });
